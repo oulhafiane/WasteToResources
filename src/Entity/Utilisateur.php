@@ -16,62 +16,62 @@ abstract class Utilisateur
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $prenom;
+    protected $prenom;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $nom;
+    protected $nom;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $email;
+    protected $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ville;
+    protected $ville;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $adresse;
+    protected $adresse;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $solde;
+    protected $solde;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $pointsFidelite;
+    protected $pointsFidelite;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $photo;
+    protected $photo;
 
     /**
      * @ORM\Column(type="string", length=20, nullable=true)
      */
-    private $telephone;
+    protected $telephone;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dateAbonnement;
+    protected $dateAbonnement;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $active;
+    protected $active;
 
     public function __construct()
     {
