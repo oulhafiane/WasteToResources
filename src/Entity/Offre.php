@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\MappedSuperclass
  */
-class Offre
+abstract class Offre
 {
     /**
      * @ORM\Id()
@@ -46,6 +46,16 @@ class Offre
      * @ORM\Column(type="integer")
      */
     protected $qte;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $dateCreation;
+
+    public function __construct()
+    {
+	$this->dateCreation = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -120,6 +130,18 @@ class Offre
     public function setQte(int $qte): self
     {
         $this->qte = $qte;
+
+        return $this;
+    }
+
+    public function getDateCreation(): ?\DateTimeInterface
+    {
+        return $this->dateCreation;
+    }
+
+    public function setDateCreation(\DateTimeInterface $dateCreation): self
+    {
+        $this->dateCreation = $dateCreation;
 
         return $this;
     }

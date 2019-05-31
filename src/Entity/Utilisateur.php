@@ -75,6 +75,9 @@ abstract class Utilisateur
 
     public function __construct()
     {
+	$this->dateAbonnement = new \DateTime();
+	$this->solde = 0;
+	$this->pointsFidelite = 0;
     }
 
     public function getId(): ?int

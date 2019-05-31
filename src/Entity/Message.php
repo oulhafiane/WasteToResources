@@ -43,6 +43,11 @@ class Message
      */
     private $expediteur;
 
+    public function __construct()
+    {
+	$this->dateEnvoi = new \DateTime();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

@@ -43,6 +43,12 @@ class Transaction
      */
     private $vendeur;
 
+    public function __construct()
+    {
+	$this->status = 0;
+	$this->dateDebut = new \Datetime();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

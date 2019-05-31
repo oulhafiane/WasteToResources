@@ -43,6 +43,12 @@ class Achat
      */
     private $acheteur;
 
+    public function __construct()
+    {
+	$this->date = new \DateTime();
+	$this->status = 0;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
