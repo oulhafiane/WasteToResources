@@ -32,13 +32,13 @@ class Message
     private $vu;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Utilisateur", inversedBy="messages")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Utilisateur")
      * @ORM\JoinColumn(nullable=false)
      */
     private $destinataire;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Utilisateur", inversedBy="messagesEnvoyes")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Utilisateur")
      * @ORM\JoinColumn(nullable=false)
      */
     private $expediteur;
