@@ -15,7 +15,7 @@ abstract class Utilisateur implements UserInterface
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    protected $id;
+    private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
