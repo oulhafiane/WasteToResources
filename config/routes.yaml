@@ -1,3 +1,14 @@
+api_auth:
+    path:   /api/auth
+
+nouveau_collecteur:
+    path:   /api/collecteur/nouveau
+    controller: App\Controller\CollecteurController::nouveau
+
+test:
+    path:   /api/test
+    controller:	App\Controller\TestController::index
+
 #index:
 #    path: /
 #    controller: App\Controller\DefaultController::index
