@@ -36,7 +36,7 @@ class Collecteur extends Utilisateur
         return $this->offresVente;
     }
 
-    public function addOffreDeVente(OffreVente $offreVente): self
+    public function addOffreVente(OffreVente $offreVente): self
     {
         if (!$this->offresVente->contains($offreVente)) {
             $this->offresVente[] = $offreVente;
@@ -46,7 +46,7 @@ class Collecteur extends Utilisateur
         return $this;
     }
 
-    public function removeOffreDeVente(OffreVente $offreVente): self
+    public function removeOffreVente(OffreVente $offreVente): self
     {
         if ($this->offresVente->contains($offreVente)) {
             $this->offresVente->removeElement($offreVente);

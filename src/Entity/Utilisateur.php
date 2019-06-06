@@ -88,11 +88,14 @@ abstract class Utilisateur implements UserInterface
      */
     protected $active;
 
+    private $encoder;
+
     public function __construct()
     {
 	$this->dateAbonnement = new \DateTime();
-	$this->solde = 0;
-	$this->pointsFidelite = 0;
+	$this->setSolde(0);
+	$this->setPointsFidelite(0);
+	$this->setActive(1);
     }
 
     public function getId(): ?int
@@ -284,13 +287,6 @@ abstract class Utilisateur implements UserInterface
     public function getDateAbonnement(): ?\DateTimeInterface
     {
         return $this->dateAbonnement;
-    }
-
-    public function setDateAbonnement(\DateTimeInterface $dateAbonnement): self
-    {
-        $this->dateAbonnement = $dateAbonnement;
-
-        return $this;
     }
 
     public function getActive(): ?bool
