@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
- * @Route("/collecteur_api")
+ * @Route("/api/collecteur")
  */
 class CollecteurController extends Controller
 {
