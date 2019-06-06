@@ -38,10 +38,10 @@ class Achat
     private $offre;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Collecteur", inversedBy="achats")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Collecteur", inversedBy="offresAcceptees")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $acheteur;
+    private $accepteur;
 
     public function __construct()
     {
@@ -102,14 +102,14 @@ class Achat
         return $this;
     }
 
-    public function getAcheteur(): ?Collecteur
+    public function getAccepteur(): ?Collecteur
     {
-        return $this->acheteur;
+        return $this->accepteur;
     }
 
-    public function setAcheteur(?Collecteur $acheteur): self
+    public function setAccepteur(?Collecteur $accepteur): self
     {
-        $this->acheteur = $acheteur;
+        $this->accepteur = $accepteur;
 
         return $this;
     }

@@ -6,22 +6,27 @@ security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
         # used to reload user from session & other features (e.g. switch_user)
-        app_user_provider:
+        app_collecteur_provider:
             entity:
-                class: App\Entity\Utilisateur
+                class: App\Entity\Collecteur
                 property: email
     firewalls:
+        register:
+            pattern:    ^/collecteur_api/nouveau
+            stateless:  true
+            anonymous: true
         login:
-            pattern:    ^/api/auth
+            pattern:    ^/collecteur_api/auth
             stateless:  true
             anonymous: true
             json_login:
-                check_path:         /api/auth
+                check_path:         /collecteur_api/auth
                 success_handler:    lexik_jwt_authentication.handler.authentication_success
                 failure_handler:    lexik_jwt_authentication.handler.authentication_failure
         api:
-            pattern:    ^/api
+            pattern:    ^/collecteur_api
             stateless:  true
+            provider:   app_collecteur_provider
             guard:
                 authenticators:
                     - lexik_jwt_authentication.jwt_token_authenticator
@@ -37,5 +42,6 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/api/auth, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+         - { path: ^/collecteur_api/nouveau, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+         - { path: ^/collecteur_api/auth, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+         - { path: ^/collecteur_api, roles: IS_AUTHENTICATED_FULLY }

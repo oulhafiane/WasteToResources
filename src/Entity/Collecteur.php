@@ -14,42 +14,42 @@ class Collecteur extends Utilisateur
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\OffreVente", mappedBy="proprietaire")
      */
-    private $offreVentes;
+    private $offresVente;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Achat", mappedBy="acheteur")
      */
-    private $achats;
+    private $offresAcceptees;
 
     public function __construct()
     {
         parent::__construct();
         $this->offreVentes = new ArrayCollection();
-        $this->achats = new ArrayCollection();
+        $this->offresAcceptees = new ArrayCollection();
     }
 
     /**
      * @return Collection|OffreVente[]
      */
-    public function getOffreVentes(): Collection
+    public function getOffresVente(): Collection
     {
-        return $this->offreVentes;
+        return $this->offresVente;
     }
 
-    public function addOffreVente(OffreVente $offreVente): self
+    public function addOffreDeVente(OffreVente $offreVente): self
     {
-        if (!$this->offreVentes->contains($offreVente)) {
-            $this->offreVentes[] = $offreVente;
+        if (!$this->offresVente->contains($offreVente)) {
+            $this->offresVente[] = $offreVente;
             $offreVente->setProprietaire($this);
         }
 
         return $this;
     }
 
-    public function removeOffreVente(OffreVente $offreVente): self
+    public function removeOffreDeVente(OffreVente $offreVente): self
     {
-        if ($this->offreVentes->contains($offreVente)) {
-            $this->offreVentes->removeElement($offreVente);
+        if ($this->offresVente->contains($offreVente)) {
+            $this->offresVente->removeElement($offreVente);
             // set the owning side to null (unless already changed)
             if ($offreVente->getProprietaire() === $this) {
                 $offreVente->setProprietaire(null);
@@ -62,28 +62,28 @@ class Collecteur extends Utilisateur
     /**
      * @return Collection|Achat[]
      */
-    public function getAchats(): Collection
+    public function getOffresAcceptees(): Collection
     {
-        return $this->achats;
+        return $this->offresAcceptees;
     }
 
-    public function addAchat(Achat $achat): self
+    public function addOffreAcceptee(Achat $offreAcceptee): self
     {
-        if (!$this->achats->contains($achat)) {
-            $this->achats[] = $achat;
-            $achat->setAcheteur($this);
+        if (!$this->offresAcceptees->contains($offreAcceptee)) {
+            $this->offresAcceptees[] = $offreAcceptee;
+            $offreAcceptee->setAccepteur($this);
         }
 
         return $this;
     }
 
-    public function removeAchat(Achat $achat): self
+    public function removeAchat(Achat $offreAcceptee): self
     {
-        if ($this->achats->contains($achat)) {
-            $this->achats->removeElement($achat);
+        if ($this->offreAcceptees->contains($offreAcceptee)) {
+            $this->offreAcceptees->removeElement($offreAcceptee);
             // set the owning side to null (unless already changed)
-            if ($achat->getAcheteur() === $this) {
-                $achat->setAcheteur(null);
+            if ($offreAcceptee->getAccepteur() === $this) {
+                $offreAcceptee->setAccepteur(null);
             }
         }
 

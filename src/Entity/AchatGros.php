@@ -38,10 +38,10 @@ class AchatGros
     private $offre;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\GrossisteRevendeur", inversedBy="achats")
+     * @ORM\ManyToOne(targetEntity="App\Entity\GrossisteRevendeur", inversedBy="offresAcceptees")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $acheteur;
+    private $accepteur;
 
     public function __construct()
     {
@@ -102,14 +102,14 @@ class AchatGros
         return $this;
     }
 
-    public function getAcheteur(): ?GrossisteRevendeur
+    public function getAccepteur(): ?GrossisteRevendeur
     {
-        return $this->acheteur;
+        return $this->accepteur;
     }
 
-    public function setAcheteur(?GrossisteRevendeur $acheteur): self
+    public function setAccepteur(?GrossisteRevendeur $accepteur): self
     {
-        $this->acheteur = $acheteur;
+        $this->accepteur = $accepteur;
 
         return $this;
     }

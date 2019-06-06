@@ -1,12 +1,8 @@
 api_auth:
-    path:   /api/auth
-
-nouveau_collecteur:
-    path:   /api/collecteur/nouveau
-    controller: App\Controller\CollecteurController::nouveau
+    path:   /collecteur_api/auth
 
 test:
-    path:   /api/test
+    path:   /collecteur_api/test
     controller:	App\Controller\TestController::index
 
 #index:

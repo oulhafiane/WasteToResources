@@ -10,13 +10,13 @@ use Doctrine\ORM\Mapping as ORM;
 class OffreVente extends Offre
 {
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Collecteur", inversedBy="offreVentes")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Collecteur", inversedBy="offresVente")
      * @ORM\JoinColumn(nullable=false)
      */
     private $proprietaire;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\GrossisteRevendeur", inversedBy="offreVentes")
+     * @ORM\ManyToOne(targetEntity="App\Entity\GrossisteRevendeur", inversedBy="achats")
      * @ORM\JoinColumn(nullable=false)
      */
     private $acheteur;

@@ -22,7 +22,7 @@ class OffreEnchere extends Offre
     private $encheres;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\GrossisteAcheteur", inversedBy="offreEncheres")
+     * @ORM\ManyToOne(targetEntity="App\Entity\GrossisteRevendeur", inversedBy="offreEncheres")
      * @ORM\JoinColumn(nullable=false)
      */
     private $proprietaire;
@@ -75,12 +75,12 @@ class OffreEnchere extends Offre
         return $this;
     }
 
-    public function getProprietaire(): ?GrossisteAcheteur
+    public function getProprietaire(): ?GrossisteRevendeur
     {
         return $this->proprietaire;
     }
 
-    public function setProprietaire(?GrossisteAcheteur $proprietaire): self
+    public function setProprietaire(?GrossisteRevendeur $proprietaire): self
     {
         $this->proprietaire = $proprietaire;
 

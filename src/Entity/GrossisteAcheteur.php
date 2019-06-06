@@ -17,11 +17,6 @@ class GrossisteAcheteur extends Utilisateur
     private $encheres;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\OffreEnchere", mappedBy="proprietaire")
-     */
-    private $offreEncheres;
-
-    /**
      * @ORM\OneToMany(targetEntity="App\Entity\OffreAchatGros", mappedBy="proprietaire")
      */
     private $offreAchatGros;
@@ -30,7 +25,6 @@ class GrossisteAcheteur extends Utilisateur
     {
         parent::__construct();
         $this->encheres = new ArrayCollection();
-        $this->offreEncheres = new ArrayCollection();
         $this->offreAchatGros = new ArrayCollection();
     }
 
@@ -59,37 +53,6 @@ class GrossisteAcheteur extends Utilisateur
             // set the owning side to null (unless already changed)
             if ($enchere->getGrossisteAcheteur() === $this) {
                 $enchere->setGrossisteAcheteur(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|OffreEnchere[]
-     */
-    public function getOffreEncheres(): Collection
-    {
-        return $this->offreEncheres;
-    }
-
-    public function addOffreEnchere(OffreEnchere $offreEnchere): self
-    {
-        if (!$this->offreEncheres->contains($offreEnchere)) {
-            $this->offreEncheres[] = $offreEnchere;
-            $offreEnchere->setProprietaire($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOffreEnchere(OffreEnchere $offreEnchere): self
-    {
-        if ($this->offreEncheres->contains($offreEnchere)) {
-            $this->offreEncheres->removeElement($offreEnchere);
-            // set the owning side to null (unless already changed)
-            if ($offreEnchere->getProprietaire() === $this) {
-                $offreEnchere->setProprietaire(null);
             }
         }
 
