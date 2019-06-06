@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20190604160103 extends AbstractMigration
+final class Version20190606003641 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -22,8 +22,8 @@ final class Version20190604160103 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('CREATE TABLE achat (id INT AUTO_INCREMENT NOT NULL, offre_id INT NOT NULL, acheteur_id INT NOT NULL, qte INT NOT NULL, date DATETIME NOT NULL, status TINYINT(1) NOT NULL, INDEX IDX_26A984564CC8505A (offre_id), INDEX IDX_26A9845696A7BB5F (acheteur_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE achat_gros (id INT AUTO_INCREMENT NOT NULL, offre_id INT NOT NULL, acheteur_id INT NOT NULL, qte INT NOT NULL, date DATETIME NOT NULL, status TINYINT(1) NOT NULL, INDEX IDX_669375A14CC8505A (offre_id), INDEX IDX_669375A196A7BB5F (acheteur_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE achat (id INT AUTO_INCREMENT NOT NULL, offre_id INT NOT NULL, accepteur_id INT NOT NULL, qte INT NOT NULL, date DATETIME NOT NULL, status TINYINT(1) NOT NULL, INDEX IDX_26A984564CC8505A (offre_id), INDEX IDX_26A98456A87A8D62 (accepteur_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE achat_gros (id INT AUTO_INCREMENT NOT NULL, offre_id INT NOT NULL, accepteur_id INT NOT NULL, qte INT NOT NULL, date DATETIME NOT NULL, status TINYINT(1) NOT NULL, INDEX IDX_669375A14CC8505A (offre_id), INDEX IDX_669375A1A87A8D62 (accepteur_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE collecteur (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, prenom VARCHAR(255) NOT NULL, nom VARCHAR(255) NOT NULL, ville VARCHAR(255) NOT NULL, addresse VARCHAR(255) NOT NULL, pays VARCHAR(255) DEFAULT NULL, solde INT DEFAULT NULL, points_fidelite INT DEFAULT NULL, photo VARCHAR(255) DEFAULT NULL, telephone VARCHAR(20) DEFAULT NULL, date_abonnement DATETIME NOT NULL, active TINYINT(1) NOT NULL, UNIQUE INDEX UNIQ_517B3AC2E7927C74 (email), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE enchere (id INT AUTO_INCREMENT NOT NULL, offre_enchere_id INT NOT NULL, grossiste_acheteur_id INT NOT NULL, prix INT NOT NULL, date DATETIME NOT NULL, INDEX IDX_38D1870FC55509DE (offre_enchere_id), INDEX IDX_38D1870FD2DE7F30 (grossiste_acheteur_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE grossiste_acheteur (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, prenom VARCHAR(255) NOT NULL, nom VARCHAR(255) NOT NULL, ville VARCHAR(255) NOT NULL, addresse VARCHAR(255) NOT NULL, pays VARCHAR(255) DEFAULT NULL, solde INT DEFAULT NULL, points_fidelite INT DEFAULT NULL, photo VARCHAR(255) DEFAULT NULL, telephone VARCHAR(20) DEFAULT NULL, date_abonnement DATETIME NOT NULL, active TINYINT(1) NOT NULL, UNIQUE INDEX UNIQ_BCF65C9FE7927C74 (email), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
@@ -37,16 +37,16 @@ final class Version20190604160103 extends AbstractMigration
         $this->addSql('CREATE TABLE reaction (id INT AUTO_INCREMENT NOT NULL, text LONGTEXT DEFAULT NULL, date DATETIME NOT NULL, destinataire_id INT NOT NULL, expediteur_id INT NOT NULL, INDEX IDX_A4D707F7A4F84F6E (destinataire_id), INDEX IDX_A4D707F710335F61 (expediteur_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE transaction (id INT AUTO_INCREMENT NOT NULL, status TINYINT(1) NOT NULL, date_debut DATETIME NOT NULL, date_fin DATETIME DEFAULT NULL, acheteur_id INT NOT NULL, vendeur_id INT NOT NULL, INDEX IDX_723705D196A7BB5F (acheteur_id), INDEX IDX_723705D1858C065E (vendeur_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('ALTER TABLE achat ADD CONSTRAINT FK_26A984564CC8505A FOREIGN KEY (offre_id) REFERENCES offre_achat (id)');
-        $this->addSql('ALTER TABLE achat ADD CONSTRAINT FK_26A9845696A7BB5F FOREIGN KEY (acheteur_id) REFERENCES collecteur (id)');
+        $this->addSql('ALTER TABLE achat ADD CONSTRAINT FK_26A98456A87A8D62 FOREIGN KEY (accepteur_id) REFERENCES collecteur (id)');
         $this->addSql('ALTER TABLE achat_gros ADD CONSTRAINT FK_669375A14CC8505A FOREIGN KEY (offre_id) REFERENCES offre_achat_gros (id)');
-        $this->addSql('ALTER TABLE achat_gros ADD CONSTRAINT FK_669375A196A7BB5F FOREIGN KEY (acheteur_id) REFERENCES grossiste_revendeur (id)');
+        $this->addSql('ALTER TABLE achat_gros ADD CONSTRAINT FK_669375A1A87A8D62 FOREIGN KEY (accepteur_id) REFERENCES grossiste_revendeur (id)');
         $this->addSql('ALTER TABLE enchere ADD CONSTRAINT FK_38D1870FC55509DE FOREIGN KEY (offre_enchere_id) REFERENCES offre_enchere (id)');
         $this->addSql('ALTER TABLE enchere ADD CONSTRAINT FK_38D1870FD2DE7F30 FOREIGN KEY (grossiste_acheteur_id) REFERENCES grossiste_acheteur (id)');
         $this->addSql('ALTER TABLE offre_achat ADD CONSTRAINT FK_718363CD76C50E4A FOREIGN KEY (proprietaire_id) REFERENCES grossiste_revendeur (id)');
         $this->addSql('ALTER TABLE offre_achat ADD CONSTRAINT FK_718363CDF347EFB FOREIGN KEY (produit_id) REFERENCES produit (id)');
         $this->addSql('ALTER TABLE offre_achat_gros ADD CONSTRAINT FK_4BCD128476C50E4A FOREIGN KEY (proprietaire_id) REFERENCES grossiste_acheteur (id)');
         $this->addSql('ALTER TABLE offre_achat_gros ADD CONSTRAINT FK_4BCD1284F347EFB FOREIGN KEY (produit_id) REFERENCES produit (id)');
-        $this->addSql('ALTER TABLE offre_enchere ADD CONSTRAINT FK_940AF42F76C50E4A FOREIGN KEY (proprietaire_id) REFERENCES grossiste_acheteur (id)');
+        $this->addSql('ALTER TABLE offre_enchere ADD CONSTRAINT FK_940AF42F76C50E4A FOREIGN KEY (proprietaire_id) REFERENCES grossiste_revendeur (id)');
         $this->addSql('ALTER TABLE offre_enchere ADD CONSTRAINT FK_940AF42FF347EFB FOREIGN KEY (produit_id) REFERENCES produit (id)');
         $this->addSql('ALTER TABLE offre_vente ADD CONSTRAINT FK_DFA0CDD776C50E4A FOREIGN KEY (proprietaire_id) REFERENCES collecteur (id)');
         $this->addSql('ALTER TABLE offre_vente ADD CONSTRAINT FK_DFA0CDD796A7BB5F FOREIGN KEY (acheteur_id) REFERENCES grossiste_revendeur (id)');
@@ -58,13 +58,13 @@ final class Version20190604160103 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE achat DROP FOREIGN KEY FK_26A9845696A7BB5F');
+        $this->addSql('ALTER TABLE achat DROP FOREIGN KEY FK_26A98456A87A8D62');
         $this->addSql('ALTER TABLE offre_vente DROP FOREIGN KEY FK_DFA0CDD776C50E4A');
         $this->addSql('ALTER TABLE enchere DROP FOREIGN KEY FK_38D1870FD2DE7F30');
         $this->addSql('ALTER TABLE offre_achat_gros DROP FOREIGN KEY FK_4BCD128476C50E4A');
-        $this->addSql('ALTER TABLE offre_enchere DROP FOREIGN KEY FK_940AF42F76C50E4A');
-        $this->addSql('ALTER TABLE achat_gros DROP FOREIGN KEY FK_669375A196A7BB5F');
+        $this->addSql('ALTER TABLE achat_gros DROP FOREIGN KEY FK_669375A1A87A8D62');
         $this->addSql('ALTER TABLE offre_achat DROP FOREIGN KEY FK_718363CD76C50E4A');
+        $this->addSql('ALTER TABLE offre_enchere DROP FOREIGN KEY FK_940AF42F76C50E4A');
         $this->addSql('ALTER TABLE offre_vente DROP FOREIGN KEY FK_DFA0CDD796A7BB5F');
         $this->addSql('ALTER TABLE achat DROP FOREIGN KEY FK_26A984564CC8505A');
         $this->addSql('ALTER TABLE achat_gros DROP FOREIGN KEY FK_669375A14CC8505A');
