@@ -22,12 +22,23 @@ security:
             chain:
                 providers: ['collecteur', 'revendeur', 'acheteur']
     firewalls:
-        register:
-            pattern:    ^/api/collecteur/nouveau
+        register_collecteur:
+            pattern:    ^/api/collecteur$
+            methods:	[POST]
+            stateless:  true
+            anonymous: true
+        register_revendeur:
+            pattern:    ^/api/revendeur$
+            methods:	[POST]
+            stateless:  true
+            anonymous: true
+        register_acheteur:
+            pattern:    ^/api/acheteur$
+            methods:	[POST]
             stateless:  true
             anonymous: true
         login:
-            pattern:    ^/api/auth
+            pattern:    ^/api/auth$
             stateless:  true
             anonymous: true
             provider: utilisateur
@@ -54,6 +65,8 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/api/collecteur/nouveau, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-         - { path: ^/api/auth, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+         - { path: ^/api/collecteur$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+         - { path: ^/api/revendeur$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+         - { path: ^/api/acheteur$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+         - { path: ^/api/auth$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
          - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
