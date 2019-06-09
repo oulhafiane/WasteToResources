@@ -5,6 +5,18 @@ test:
     path:   /api/test
     controller:	App\Controller\TestController::index
 
+tmp_collecteurs:
+    path: /collecteurs
+    controller: App\Controller\TestController::collecteurs
+
+tmp_revendeurs:
+    path: /revendeurs
+    controller: App\Controller\TestController::revendeurs
+
+tmp_acheteurs:
+    path: /acheteurs
+    controller: App\Controller\TestController::acheteurs
+
 #index:
 #    path: /
 #    controller: App\Controller\DefaultController::index

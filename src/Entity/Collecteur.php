@@ -17,7 +17,7 @@ class Collecteur extends Utilisateur
     private $offresVente;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Achat", mappedBy="acheteur")
+     * @ORM\OneToMany(targetEntity="App\Entity\Achat", mappedBy="accepteur")
      */
     private $offresAcceptees;
 
