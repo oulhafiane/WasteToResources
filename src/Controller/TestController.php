@@ -3,6 +3,7 @@
 namespace App\Controller;
 use App\Entity\Collecteur;
 use App\Entity\GrossisteRevendeur;
+use App\Entity\GrossisteAcheteur;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use JMS\Serializer\SerializerInterface;
@@ -62,7 +63,7 @@ class TestController extends AbstractController
 
     public function acheteurs()
     {
-	$acheteurs = $this->getDoctrine()->getRepository(GrossisteRevendeur::class)->findAll();
+	$acheteurs = $this->getDoctrine()->getRepository(GrossisteAcheteur::class)->findAll();
 	$data = $this->serializer->serialize($acheteurs, 'json');
 	$response = new Response($data);
 	$response->headers->set('Content-Type', 'application/json');
