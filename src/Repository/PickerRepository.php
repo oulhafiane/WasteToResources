@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\Produit;
+use App\Entity\Picker;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
- * @method Produit|null find($id, $lockMode = null, $lockVersion = null)
- * @method Produit|null findOneBy(array $criteria, array $orderBy = null)
- * @method Produit[]    findAll()
- * @method Produit[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Picker|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Picker|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Picker[]    findAll()
+ * @method Picker[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ProduitRepository extends ServiceEntityRepository
+class PickerRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, Produit::class);
+        parent::__construct($registry, Picker::class);
     }
 
     // /**
-    //  * @return Produit[] Returns an array of Produit objects
+    //  * @return Picker[] Returns an array of Picker objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class ProduitRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?Produit
+    public function findOneBySomeField($value): ?Picker
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.exampleField = :val')

@@ -5,9 +5,9 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\MessageRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\FeedbackRepository")
  */
-class Message
+class Feedback
 {
     /**
      * @ORM\Id()
@@ -27,18 +27,13 @@ class Message
     private $date;
 
     /**
-     * @ORM\Column(type="boolean")
-     */
-    private $seen;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="inbox")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="feedbacks")
      * @ORM\JoinColumn(nullable=false)
      */
     private $receiver;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="sent")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="feedbacks_sent")
      * @ORM\JoinColumn(nullable=false)
      */
     private $sender;
@@ -46,7 +41,6 @@ class Message
 	public function __construct()
 	{
 		$this->date = new \DateTime();
-		$this->setSeen(0);
 	}
 
     public function getId(): ?int
@@ -69,18 +63,6 @@ class Message
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
-    }
-
-    public function getSeen(): ?bool
-    {
-        return $this->seen;
-    }
-
-    public function setSeen(bool $seen): self
-    {
-        $this->seen = $seen;
-
-        return $this;
     }
 
     public function getReceiver(): ?User

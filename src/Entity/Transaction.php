@@ -9,108 +9,173 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Transaction
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+	/**
+	 * @ORM\Id()
+	 * @ORM\GeneratedValue()
+	 * @ORM\Column(type="integer")
+	 */
+	private $id;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $status;
+	/**
+	 * @ORM\Column(type="boolean")
+	 */
+	private $status;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $dateDebut;
+	/**
+	 * @ORM\Column(type="datetime")
+	 */
+	private $start_date;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $dateFin;
+	/**
+	 * @ORM\Column(type="datetime")
+	 */
+	private $end_date;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Utilisateur", inversedBy="achats")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $acheteur;
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="purchases")
+	 * @ORM\JoinColumn(nullable=false)
+	 */
+	private $buyer;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Utilisateur", inversedBy="ventes")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $vendeur;
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="sales")
+	 * @ORM\JoinColumn(nullable=false)
+	 */
+	private $seller;
 
-    public function __construct()
-    {
-	$this->status = 0;
-	$this->dateDebut = new \Datetime();
-    }
+	/**
+	 * @ORM\Column(type="bigint")
+	 */
+	private $total;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Offer", inversedBy="transactions")
+	 * @ORM\JoinColumn(nullable=false)
+	 */
+	private $offer;
 
-    public function getStatus(): ?bool
-    {
-        return $this->status;
-    }
+	/**
+	 * @ORM\Column(type="uuid", unique=true)
+	 * @ORM\GeneratedValue(strategy="CUSTOM")
+	 * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
+	 */
+	private $seller_key;
 
-    public function setStatus(bool $status): self
-    {
-        $this->status = $status;
+	/**
+	 * @ORM\Column(type="uuid", unique=true)
+	 * @ORM\GeneratedValue(strategy="CUSTOM")
+	 * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
+	 */
+	private $buyer_key;
 
-        return $this;
-    }
+	public function __construct()
+	{
+		$this->setStatus(0);
+		$this->start_date = new \DateTime();
+		$this->end_date = 0;
+	}
 
-    public function getDateDebut(): ?\DateTimeInterface
-    {
-        return $this->dateDebut;
-    }
+	public function getId(): ?int
+	{
+		return $this->id;
+	}
 
-    public function setDateDebut(\DateTimeInterface $dateDebut): self
-    {
-        $this->dateDebut = $dateDebut;
+	public function getStatus(): ?bool
+	{
+		return $this->status;
+	}
 
-        return $this;
-    }
+	public function getStartDate(): ?\DateTimeInterface
+	{
+		return $this->start_date;
+	}
 
-    public function getDateFin(): ?\DateTimeInterface
-    {
-        return $this->dateFin;
-    }
+	public function getEndDate(): ?\DateTimeInterface
+	{
+		return $this->end_date;
+	}
 
-    public function setDateFin(?\DateTimeInterface $dateFin): self
-    {
-        $this->dateFin = $dateFin;
+	public function getBuyer(): ?User
+	{
+		return $this->buyer;
+	}
 
-        return $this;
-    }
+	public function setBuyer(?User $buyer): self
+	{
+		$this->buyer = $buyer;
 
-    public function getAcheteur(): ?Utilisateur
-    {
-        return $this->acheteur;
-    }
+		return $this;
+	}
 
-    public function setAcheteur(?Utilisateur $acheteur): self
-    {
-        $this->acheteur = $acheteur;
+	public function getSeller(): ?User
+	{
+		return $this->seller;
+	}
 
-        return $this;
-    }
+	public function setSeller(?User $seller): self
+	{
+		$this->seller = $seller;
 
-    public function getVendeur(): ?Utilisateur
-    {
-        return $this->vendeur;
-    }
+		return $this;
+	}
 
-    public function setVendeur(?Utilisateur $vendeur): self
-    {
-        $this->vendeur = $vendeur;
+	public function endTransaction(): self
+	{
+		//Remember to verify keys
+		if ($this->state === 0)
+		{
+			$this->end_date = new \DateTime();
+			$this->state = 1;
+		}
 
-        return $this;
-    }
+		return $this;
+	}
+
+	public function getTotal(): ?int
+	{
+		return $this->total;
+	}
+
+	public function setTotal(int $total): self
+	{
+		$this->total = $total;
+
+		return $this;
+	}
+
+	public function getOffer(): ?Offer
+	{
+		return $this->offer;
+	}
+
+	public function setOffer(?Offer $offer): self
+	{
+		$this->offer = $offer;
+
+		return $this;
+	}
+
+	public function getSellerKey(): ?string
+	{
+		return $this->seller_key;
+	}
+
+	public function setSellerKey(string $seller_key): self
+	{
+		$this->seller_key = $seller_key;
+
+		return $this;
+	}
+
+	public function getBuyerKey(): ?string
+	{
+		return $this->buyer_key;
+	}
+
+	public function setBuyerKey(string $buyer_key): self
+	{
+		$this->buyer_key = $buyer_key;
+
+		return $this;
+	}
 }

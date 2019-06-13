@@ -1,39 +1,28 @@
 security:
     encoders:
-        App\Entity\Utilisateur:
+        App\Entity\User:
             algorithm: bcrypt
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
         # used to reload user from session & other features (e.g. switch_user)
-        collecteur:
+        user:
             entity:
-                class: App\Entity\Collecteur
+                class: App\Entity\User
                 property: email
-        revendeur:
-            entity:
-                class: App\Entity\GrossisteRevendeur
-                property: email
-        acheteur:
-            entity:
-                class: App\Entity\GrossisteAcheteur
-                property: email
-        utilisateur:
-            chain:
-                providers: ['collecteur', 'revendeur', 'acheteur']
     firewalls:
-        register_collecteur:
-            pattern:    ^/api/collecteur$
+        register_picker:
+            pattern:    ^/api/picker$
             methods:	[POST]
             stateless:  true
             anonymous: true
-        register_revendeur:
-            pattern:    ^/api/revendeur$
+        register_reseller:
+            pattern:    ^/api/reseller$
             methods:	[POST]
             stateless:  true
             anonymous: true
-        register_acheteur:
-            pattern:    ^/api/acheteur$
+        register_buyer:
+            pattern:    ^/api/buyer$
             methods:	[POST]
             stateless:  true
             anonymous: true
@@ -41,7 +30,7 @@ security:
             pattern:    ^/api/auth$
             stateless:  true
             anonymous: true
-            provider: utilisateur
+            provider: user
             json_login:
                 check_path:         /api/auth
                 success_handler:    lexik_jwt_authentication.handler.authentication_success
@@ -49,7 +38,7 @@ security:
         api:
             pattern:    ^/api
             stateless:  true
-            provider: utilisateur
+            provider: user
             guard:
                 authenticators:
                     - lexik_jwt_authentication.jwt_token_authenticator
@@ -65,8 +54,8 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/api/collecteur$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
-         - { path: ^/api/revendeur$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
-         - { path: ^/api/acheteur$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+         - { path: ^/api/picker$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+         - { path: ^/api/reseller$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+         - { path: ^/api/buyer$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
          - { path: ^/api/auth$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
          - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

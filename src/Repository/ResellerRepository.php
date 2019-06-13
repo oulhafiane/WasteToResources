@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\Reaction;
+use App\Entity\Reseller;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
- * @method Reaction|null find($id, $lockMode = null, $lockVersion = null)
- * @method Reaction|null findOneBy(array $criteria, array $orderBy = null)
- * @method Reaction[]    findAll()
- * @method Reaction[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Reseller|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Reseller|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Reseller[]    findAll()
+ * @method Reseller[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ReactionRepository extends ServiceEntityRepository
+class ResellerRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, Reaction::class);
+        parent::__construct($registry, Reseller::class);
     }
 
     // /**
-    //  * @return Reaction[] Returns an array of Reaction objects
+    //  * @return Reseller[] Returns an array of Reseller objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class ReactionRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?Reaction
+    public function findOneBySomeField($value): ?Reseller
     {
         return $this->createQueryBuilder('r')
             ->andWhere('r.exampleField = :val')

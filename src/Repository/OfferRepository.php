@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\OffreVente;
+use App\Entity\Offer;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
- * @method OffreVente|null find($id, $lockMode = null, $lockVersion = null)
- * @method OffreVente|null findOneBy(array $criteria, array $orderBy = null)
- * @method OffreVente[]    findAll()
- * @method OffreVente[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Offer|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Offer|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Offer[]    findAll()
+ * @method Offer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class OffreVenteRepository extends ServiceEntityRepository
+class OfferRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, OffreVente::class);
+        parent::__construct($registry, Offer::class);
     }
 
     // /**
-    //  * @return OffreVente[] Returns an array of OffreVente objects
+    //  * @return Offer[] Returns an array of Offer objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class OffreVenteRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?OffreVente
+    public function findOneBySomeField($value): ?Offer
     {
         return $this->createQueryBuilder('o')
             ->andWhere('o.exampleField = :val')

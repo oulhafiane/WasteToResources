@@ -2,111 +2,98 @@
 
 namespace App\Controller;
 
-use App\Entity\Utilisateur;
-use App\Entity\Collecteur;
-use App\Entity\GrossisteRevendeur;
-use App\Entity\GrossisteAcheteur;
+use App\Entity\User;
+use App\Entity\Picker;
+use App\Entity\Reseller;
+use App\Entity\Buyer;
 use App\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class RegistrationController extends AbstractController
 {
-    private $encoder;
-    private $validator;
+	private $encoder;
+	private $validator;
 
-    private function checkEmail($email)
-    {
-        if (is_null($email))
-            return (False);
-        $user = $this->getDoctrine()->getRepository(Collecteur::class)->findOneByEmail($email);
-        if (!is_null($user))
-            return (False);
-        $user = $this->getDoctrine()->getRepository(GrossisteRevendeur::class)->findOneByEmail($email);
-        if (!is_null($user))
-            return (False);
-        $user = $this->getDoctrine()->getRepository(GrossisteAcheteur::class)->findOneByEmail($email);
-        if (!is_null($user))
-            return (False);
-
-        return (True);
-    }
-
-    private function nouveauUtilisateur(Request $request, Utilisateur $utilisateur): Response
-    {
-	$data = json_decode($request->getContent(), true);
-
-	$code = 401;
-	$message = 'Unauthorized';
-
-	if (!is_null($data))
+	public function __construct(UserPasswordEncoderInterface $encoder, ValidatorInterface $validator)
 	{
-	    $form = $this->createForm(RegistrationFormType::class, $utilisateur);
-	    $form->submit($data);
-	    $listErrors = $this->validator->validate($utilisateur);
-	    if (count($listErrors) === 0 && $this->checkEmail($form->get('email')->getData()) === True) {
-		$utilisateur->setPassword(
-		    $this->encoder->encodePassword(
-			$utilisateur,
-			$form->get('password')->getData()
-		    )
-		);
-
-		$entityManager = $this->getDoctrine()->getManager();
-		$entityManager->persist($utilisateur);
-		$entityManager->flush();
-
-		$code = 201;
-		$message = 'User created successfully';	
-	    }
+		$this->encoder = $encoder;
+		$this->validator = $validator;
 	}
-	
-	$response = new Response((json_encode([
-		    'code' => $code,
-		    'message' => $message
-		])), $code);
-	$response->headers->set('Content-Type', 'application/json');
 
-	return $response;
-    }
+	private function register(Request $request, User $user)
+	{
+		$data = json_decode($request->getContent(), true);
+		$code = 401;
+		$message = "Unauthorized";
 
-    /**
-     * @Route("/api/collecteur", name="nouveau_collecteur", methods={"POST"})
-     */
-    public function nouveauCollecteur(Request $request, UserPasswordEncoderInterface $encoder, ValidatorInterface $validator): Response
-    {
-	$this->encoder = $encoder;
-	$this->validator = $validator;
-	$utilisateur = new Collecteur();
-	
-	return $this->nouveauUtilisateur($request, $utilisateur);
-    }
+		if (!is_null($data))
+		{
+			$form = $this->createForm(RegistrationFormType::class, $user);
+			$form->submit($data);
+			$violations = $this->validator->validate($user);
+			$errors = NULL;
 
-    /**
-     * @Route("/api/revendeur", name="nouveau_revendeur", methods={"POST"})
-     */
-    public function nouveauRevendeur(Request $request, UserPasswordEncoderInterface $encoder, ValidatorInterface $validator): Response
-    {
-	$this->encoder = $encoder;
-	$this->validator = $validator;
-	$utilisateur = new GrossisteRevendeur();
+			if (count($violations) !== 0) {
+				$errors = [];
+				foreach ($violations as $violation) {
+					$errors[$violation->getPropertyPath()] = $violation->getMessage();
+				}
+			}
+			else {
+				$user->setPassword(
+					$this->encoder->encodePassword(
+						$user,
+						$form->get('password')->getData()
+					)
+				);
 
-	return $this->nouveauUtilisateur($request, $utilisateur);
-    }
+				$em = $this->getDoctrine()->getManager();
+				$em->persist($user);
+				$em->flush();
 
-    /**
-     * @Route("/api/acheteur", name="nouveau_acheteur", methods={"POST"})
-     */
-    public function nouveauAcheteur(Request $request, UserPasswordEncoderInterface $encoder, ValidatorInterface $validator): Response
-    {
-	$this->encoder = $encoder;
-	$this->validator = $validator;
-	$utilisateur = new GrossisteAcheteur();
+				$code = 201;
+				$message = 'User created successfully';
+			}
+		}
 
-	return $this->nouveauUtilisateur($request, $utilisateur);
-    }
+		return $this->json([
+			'code' => $code,
+			'message' => $message,
+			'errors' => $errors
+		], $code);
+	}
+
+	/**
+	 * @Route("/api/picker", name="register_picker", methods={"POST"})
+	 */
+	public function pickerAction(Request $request)
+	{
+		$picker = new Picker();
+
+		return $this->register($request, $picker);
+	}
+
+	/**
+	 * @Route("/api/reseller", name="register_reseller", methods={"POST"})
+	 */
+	public function resellerAction(Request $request)
+	{
+		$reseller = new Reseller();
+
+		return $this->register($request, $reseller);
+	}
+
+	/**
+	 * @Route("/api/buyer", name="register_buyer", methods={"POST"})
+	 */
+	public function buyerAction(Request $request)
+	{
+		$buyer = new Buyer();
+
+		return $this->register($request, $buyer);
+	}
 }

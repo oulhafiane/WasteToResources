@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\AchatGros;
+use App\Entity\AuctionBid;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
- * @method AchatGros|null find($id, $lockMode = null, $lockVersion = null)
- * @method AchatGros|null findOneBy(array $criteria, array $orderBy = null)
- * @method AchatGros[]    findAll()
- * @method AchatGros[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method AuctionBid|null find($id, $lockMode = null, $lockVersion = null)
+ * @method AuctionBid|null findOneBy(array $criteria, array $orderBy = null)
+ * @method AuctionBid[]    findAll()
+ * @method AuctionBid[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class AchatGrosRepository extends ServiceEntityRepository
+class AuctionBidRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, AchatGros::class);
+        parent::__construct($registry, AuctionBid::class);
     }
 
     // /**
-    //  * @return AchatGros[] Returns an array of AchatGros objects
+    //  * @return AuctionBid[] Returns an array of AuctionBid objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class AchatGrosRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?AchatGros
+    public function findOneBySomeField($value): ?AuctionBid
     {
         return $this->createQueryBuilder('a')
             ->andWhere('a.exampleField = :val')
