@@ -24,21 +24,21 @@ class Transaction
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	private $start_date;
+	private $starDate;
 
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	private $end_date;
+	private $endDate;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="purchases")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="purchasesTransactions")
 	 * @ORM\JoinColumn(nullable=false)
 	 */
 	private $buyer;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="sales")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="salesTransactions")
 	 * @ORM\JoinColumn(nullable=false)
 	 */
 	private $seller;
@@ -59,20 +59,20 @@ class Transaction
 	 * @ORM\GeneratedValue(strategy="CUSTOM")
 	 * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
 	 */
-	private $seller_key;
+	private $sellerKey;
 
 	/**
 	 * @ORM\Column(type="uuid", unique=true)
 	 * @ORM\GeneratedValue(strategy="CUSTOM")
 	 * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
 	 */
-	private $buyer_key;
+	private $buyerKey;
 
 	public function __construct()
 	{
 		$this->setStatus(0);
-		$this->start_date = new \DateTime();
-		$this->end_date = 0;
+		$this->startDate = new \DateTime();
+		$this->endDate = 0;
 	}
 
 	public function getId(): ?int
@@ -87,12 +87,12 @@ class Transaction
 
 	public function getStartDate(): ?\DateTimeInterface
 	{
-		return $this->start_date;
+		return $this->startDate;
 	}
 
 	public function getEndDate(): ?\DateTimeInterface
 	{
-		return $this->end_date;
+		return $this->endDate;
 	}
 
 	public function getBuyer(): ?User
@@ -124,7 +124,7 @@ class Transaction
 		//Remember to verify keys
 		if ($this->state === 0)
 		{
-			$this->end_date = new \DateTime();
+			$this->endDate = new \DateTime();
 			$this->state = 1;
 		}
 
@@ -157,24 +157,24 @@ class Transaction
 
 	public function getSellerKey(): ?string
 	{
-		return $this->seller_key;
+		return $this->sellerKey;
 	}
 
-	public function setSellerKey(string $seller_key): self
+	public function setSellerKey(string $sellerKey): self
 	{
-		$this->seller_key = $seller_key;
+		$this->sellerKey = $sellerKey;
 
 		return $this;
 	}
 
 	public function getBuyerKey(): ?string
 	{
-		return $this->buyer_key;
+		return $this->buyerKey;
 	}
 
-	public function setBuyerKey(string $buyer_key): self
+	public function setBuyerKey(string $buyerKey): self
 	{
-		$this->buyer_key = $buyer_key;
+		$this->buyerKey = $buyerKey;
 
 		return $this;
 	}

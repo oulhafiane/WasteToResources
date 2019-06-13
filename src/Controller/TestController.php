@@ -19,6 +19,33 @@ class TestController extends AbstractController
 		$this->serializer = $serializer;
 	}
 
+	private function getCurrentUser()
+	{
+
+		if (!$this->has('security.token_storage')) {
+			throw new \LogicException('The Security Bundle is not registered in your application.');
+		}
+		if (null === $token = $this->get('security.token_storage')->getToken()) {
+			return;
+		}
+		if (!is_object($user = $token->getUser())) {
+			// e.g. anonymous authentication
+			return;
+		}
+		return $user;
+	}
+
+	/**
+	 * @Route("/api/test", name="test", methods={"GET"})
+	 */
+	public function testAction()
+	{
+		$current_user = $this->getCurrentUser();
+		$response = new Response("Very good you are logged and you are a : ".get_class($current_user));
+
+		return $response;
+	}
+
 	/**
 	 * @Route("/users", name="users", methods={"GET"})
 	 */

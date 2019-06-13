@@ -7,9 +7,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\TypeOfferRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
  */
-class TypeOffer
+class Category
 {
     /**
      * @ORM\Id()
@@ -29,7 +29,7 @@ class TypeOffer
     private $description;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Offer", mappedBy="type_offer")
+     * @ORM\OneToMany(targetEntity="App\Entity\Offer", mappedBy="typeOffer")
      */
     private $offers;
 
@@ -79,7 +79,7 @@ class TypeOffer
     {
         if (!$this->offers->contains($offer)) {
             $this->offers[] = $offer;
-            $offer->setTypeOffer($this);
+            $offer->setCategory($this);
         }
 
         return $this;
@@ -90,8 +90,8 @@ class TypeOffer
         if ($this->offers->contains($offer)) {
             $this->offers->removeElement($offer);
             // set the owning side to null (unless already changed)
-            if ($offer->getTypeOffer() === $this) {
-                $offer->setTypeOffer(null);
+            if ($offer->getCategory() === $this) {
+                $offer->setCategory(null);
             }
         }
 

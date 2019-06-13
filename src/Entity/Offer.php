@@ -26,23 +26,23 @@ abstract class Offer
 	/**
 	 * @ORM\Column(type="boolean")
 	 */
-	protected $with_transport;
+	protected $withTransport;
 
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	protected $start_date;
+	protected $startDate;
 
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	protected $end_date;
+	protected $endDate;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\TypeOffer", inversedBy="offers")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="offers")
 	 * @ORM\JoinColumn(nullable=false)
 	 */
-	protected $type_offer;
+	protected $category;
 
 	/**
 	 * @ORM\Column(type="bigint")
@@ -52,7 +52,7 @@ abstract class Offer
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	protected $creation_date;
+	protected $creationDate;
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
@@ -66,7 +66,7 @@ abstract class Offer
 
 	public function __construct()
 	{
-		$this->creaction_date = new \DateTime();
+		$this->creactionDate = new \DateTime();
 	}
 
 	public function getId(): ?int
@@ -88,48 +88,48 @@ abstract class Offer
 
 	public function getWithTransport(): ?bool
 	{
-		return $this->with_transport;
+		return $this->withTransport;
 	}
 
-	public function setWithTransport(bool $with_transport): self
+	public function setWithTransport(bool $withTransport): self
 	{
-		$this->with_transport = $with_transport;
+		$this->withTransport = $withTransport;
 
 		return $this;
 	}
 
 	public function getStartDate(): ?\DateTimeInterface
 	{
-		return $this->start_date;
+		return $this->startDate;
 	}
 
-	public function setStartDate(\DateTimeInterface $start_date): self
+	public function setStartDate(\DateTimeInterface $startDate): self
 	{
-		$this->start_date = $start_date;
+		$this->startDate = $startDate;
 
 		return $this;
 	}
 
 	public function getEndDate(): ?\DateTimeInterface
 	{
-		return $this->end_date;
+		return $this->endDate;
 	}
 
-	public function setEndDate(\DateTimeInterface $end_date): self
+	public function setEndDate(\DateTimeInterface $endDate): self
 	{
-		$this->end_date = $end_date;
+		$this->endDate = $endDate;
 
 		return $this;
 	}
 
-	public function getTypeOffer(): ?TypeOffer
+	public function getCategory(): ?Category
 	{
-		return $this->type_offer;
+		return $this->category;
 	}
 
-	public function setTypeOffer(?TypeOffer $type_offer): self
+	public function setCategory(?Category $category): self
 	{
-		$this->type_offer = $type_offer;
+		$this->category = $category;
 
 		return $this;
 	}
@@ -148,7 +148,7 @@ abstract class Offer
 
 	public function getCreationDate(): ?\DateTimeInterface
 	{
-		return $this->creation_date;
+		return $this->creationDate;
 	}
 
 	public function getPictures(): ?array

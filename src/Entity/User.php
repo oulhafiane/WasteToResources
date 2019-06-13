@@ -46,13 +46,13 @@ class User implements UserInterface
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
 	 */
-	protected $first_name;
+	protected $firstName;
 
 	/**
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
 	 */
-	protected $last_name;
+	protected $lastName;
 
 	/**
 	 * @ORM\Column(type="string", length=50)
@@ -86,7 +86,7 @@ class User implements UserInterface
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	protected $loyalty_points;
+	protected $loyaltyPoints;
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=true)
@@ -96,12 +96,12 @@ class User implements UserInterface
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	protected $subscription_date;
+	protected $subscriptionDate;
 
 	/**
 	 * @ORM\Column(type="boolean")
 	 */
-	protected $is_active;
+	protected $isActive;
 
 	/**
 	 * @ORM\OneToMany(targetEntity="App\Entity\Message", mappedBy="receiver")
@@ -121,30 +121,30 @@ class User implements UserInterface
 	/**
 	 * @ORM\OneToMany(targetEntity="App\Entity\Feedback", mappedBy="sender")
 	 */
-	protected $feedbacks_sent;
+	protected $feedbacksSent;
 
 	/**
 	 * @ORM\OneToMany(targetEntity="App\Entity\Transaction", mappedBy="buyer")
 	 */
-	protected $purchases_transactions;
+	protected $purchasesTransactions;
 
 	/**
 	 * @ORM\OneToMany(targetEntity="App\Entity\Transaction", mappedBy="seller")
 	 */
-	protected $sales_transactions;
+	protected $salesTransactions;
 
 	public function __construct()
 	{
-		$this->subscription_date = new \DateTime();
+		$this->subscriptionDate = new \DateTime();
 		$this->setBalance(0);
 		$this->setLoyaltyPoints(0);
 		$this->setIsActive(1);
 		$this->inbox = new ArrayCollection();
 		$this->sent = new ArrayCollection();
 		$this->feedbacks = new ArrayCollection();
-		$this->feedbacks_sent = new ArrayCollection();
-		$this->purchases_transactions = new ArrayCollection();
-		$this->sales_transactions = new ArrayCollection();
+		$this->feedbacksSent = new ArrayCollection();
+		$this->purchasesTransactions = new ArrayCollection();
+		$this->salesTransactions = new ArrayCollection();
 	}
 
 	public function getId(): ?int
@@ -227,24 +227,24 @@ class User implements UserInterface
 
 	public function getFirstName(): ?string
 	{
-		return $this->first_name;
+		return $this->firstName;
 	}
 
-	public function setFirstName(string $first_name): self
+	public function setFirstName(string $firstName): self
 	{
-		$this->first_name = $first_name;
+		$this->firstName = $firstName;
 
 		return $this;
 	}
 
 	public function getLastName(): ?string
 	{
-		return $this->last_name;
+		return $this->lastName;
 	}
 
-	public function setLastName(string $last_name): self
+	public function setLastName(string $lastName): self
 	{
-		$this->last_name = $last_name;
+		$this->lastName = $lastName;
 
 		return $this;
 	}
@@ -311,12 +311,12 @@ class User implements UserInterface
 
 	public function getLoyaltyPoints(): ?int
 	{
-		return $this->loyalty_points;
+		return $this->loyaltyPoints;
 	}
 
-	public function setLoyaltyPoints(?int $loyalty_points): self
+	public function setLoyaltyPoints(?int $loyaltyPoints): self
 	{
-		$this->loyalty_points = $loyalty_points;
+		$this->loyaltyPoints = $loyaltyPoints;
 
 		return $this;
 	}
@@ -335,17 +335,17 @@ class User implements UserInterface
 
 	public function getSubscriptionDate(): ?\DateTimeInterface
 	{
-		return $this->subscription_date;
+		return $this->subscriptionDate;
 	}
 
 	public function getIsActive(): ?bool
 	{
-		return $this->is_active;
+		return $this->isActive;
 	}
 
-	public function setIsActive(bool $is_active): self
+	public function setIsActive(bool $isActive): self
 	{
-		$this->is_active = $is_active;
+		$this->isActive = $isActive;
 
 		return $this;
 	}
@@ -448,13 +448,13 @@ class User implements UserInterface
 	 */
 	public function getFeedbacksSent(): Collection
 	{
-		return $this->feedbacks_sent;
+		return $this->feedbacksSent;
 	}
 
 	public function addFeedbacksSent(Feedback $feedbacksSent): self
 	{
-		if (!$this->feedbacks_sent->contains($feedbacksSent)) {
-			$this->feedbacks_sent[] = $feedbacksSent;
+		if (!$this->feedbacksSent->contains($feedbacksSent)) {
+			$this->feedbacksSent[] = $feedbacksSent;
 			$feedbacksSent->setSender($this);
 		}
 
@@ -463,8 +463,8 @@ class User implements UserInterface
 
 	public function removeFeedbacksSent(Feedback $feedbacksSent): self
 	{
-		if ($this->feedbacks_sent->contains($feedbacksSent)) {
-			$this->feedbacks_sent->removeElement($feedbacksSent);
+		if ($this->feedbacksSent->contains($feedbacksSent)) {
+			$this->feedbacksSent->removeElement($feedbacksSent);
 			// set the owning side to null (unless already changed)
 			if ($feedbacksSent->getSender() === $this) {
 				$feedbacksSent->setSender(null);
@@ -479,13 +479,13 @@ class User implements UserInterface
 	 */
 	public function getpurchasesTransactions(): Collection
 	{
-		return $this->purchases_transactions;
+		return $this->purchasesTransactions;
 	}
 
 	public function addPurchaseTransaction(Transaction $purchase): self
 	{
-		if (!$this->purchases_transactions->contains($purchase)) {
-			$this->purchases_transactions[] = $purchase;
+		if (!$this->purchasesTransactions->contains($purchase)) {
+			$this->purchasesTransactions[] = $purchase;
 			$purchase->setBuyer($this);
 		}
 
@@ -494,8 +494,8 @@ class User implements UserInterface
 
 	public function removePurchaseTransaction(Transaction $purchase): self
 	{
-		if ($this->purchases_transactions->contains($purchase)) {
-			$this->purchases_transactions->removeElement($purchase);
+		if ($this->purchasesTransactions->contains($purchase)) {
+			$this->purchasesTransactions->removeElement($purchase);
 			// set the owning side to null (unless already changed)
 			if ($purchase->getBuyer() === $this) {
 				$purchase->setBuyer(null);
@@ -510,13 +510,13 @@ class User implements UserInterface
 	 */
 	public function getsalesTransactions(): Collection
 	{
-		return $this->sales_transactions;
+		return $this->salesTransactions;
 	}
 
 	public function addSaleTransaction(Transaction $sale): self
 	{
-		if (!$this->sales_transactions->contains($sale)) {
-			$this->sales_transactions[] = $sale;
+		if (!$this->salesTransactions->contains($sale)) {
+			$this->salesTransactions[] = $sale;
 			$sale->setSeller($this);
 		}
 
@@ -525,8 +525,8 @@ class User implements UserInterface
 
 	public function removeSaleTransaction(Transaction $sale): self
 	{
-		if ($this->sales_transactions->contains($sale)) {
-			$this->sales_transactions->removeElement($sale);
+		if ($this->salesTransactions->contains($sale)) {
+			$this->salesTransactions->removeElement($sale);
 			// set the owning side to null (unless already changed)
 			if ($sale->getSeller() === $this) {
 				$sale->setSeller(null);

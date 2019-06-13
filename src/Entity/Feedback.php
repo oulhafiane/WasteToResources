@@ -33,7 +33,7 @@ class Feedback
     private $receiver;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="feedbacks_sent")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="feedbacksSent")
      * @ORM\JoinColumn(nullable=false)
      */
     private $sender;
