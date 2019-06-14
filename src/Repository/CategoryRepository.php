@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\TypeOffer;
+use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
- * @method TypeOffer|null find($id, $lockMode = null, $lockVersion = null)
- * @method TypeOffer|null findOneBy(array $criteria, array $orderBy = null)
- * @method TypeOffer[]    findAll()
- * @method TypeOffer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Category|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Category|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Category[]    findAll()
+ * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TypeOfferRepository extends ServiceEntityRepository
+class CategoryRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, TypeOffer::class);
+        parent::__construct($registry, Category::class);
     }
 
     // /**
-    //  * @return TypeOffer[] Returns an array of TypeOffer objects
+    //  * @return Category[] Returns an array of Category objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class TypeOfferRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?TypeOffer
+    public function findOneBySomeField($value): ?Category
     {
         return $this->createQueryBuilder('t')
             ->andWhere('t.exampleField = :val')

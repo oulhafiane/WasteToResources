@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints AS Assert;
 
 /**
  * @ORM\MappedSuperclass
@@ -19,7 +20,25 @@ abstract class Offer
 	private $id;
 
 	/**
+	 * @ORM\Column(type="string", length=25)
+	 * @Assert\NotBlank
+	 * @Assert\Length(
+	 *	min = 5,
+	 *	max = 20
+	 * )
+	 */
+	private $title;
+
+	/**
+	 * @ORM\Column(type="text")
+	 * @Assert\NotBlank
+	 */
+	private $description;
+
+	/**
 	 * @ORM\Column(type="integer")
+	 * @Assert\NotBlank
+	 * @Assert\Positive
 	 */
 	protected $price;
 
@@ -39,20 +58,17 @@ abstract class Offer
 	protected $endDate;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="offers")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Category")
 	 * @ORM\JoinColumn(nullable=false)
 	 */
 	protected $category;
 
 	/**
 	 * @ORM\Column(type="bigint")
+	 * @Assert\NotBlank
+	 * @Assert\Positive
 	 */
 	protected $weight;
-
-	/**
-	 * @ORM\Column(type="datetime")
-	 */
-	protected $creationDate;
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
@@ -61,12 +77,28 @@ abstract class Offer
 
 	/**
 	 * @ORM\Column(type="array")
+	 * @Assert\Type(
+	 *	type = "array"
+	 * )
 	 */
 	protected $locations = [];
 
+	/**
+	 * @ORM\Column(type="array", nullable=true)
+	 * @Assert\Type(
+	 *	type = "array"
+	 * )
+	 */
+	private $keywords = [];
+
 	public function __construct()
 	{
-		$this->creactionDate = new \DateTime();
+		$date = new \DateTime();
+		$this->startDate = $date;
+		if ($this instanceOf AuctionBid)
+			$this->endDate = new \DateTime(date("Y-m-d h:i:s", strtotime("+7 day")));
+		else
+			$this->endDate = new \DateTime(date("Y-m-d h:i:s", strtotime("+30 day")));
 	}
 
 	public function getId(): ?int
@@ -103,23 +135,9 @@ abstract class Offer
 		return $this->startDate;
 	}
 
-	public function setStartDate(\DateTimeInterface $startDate): self
-	{
-		$this->startDate = $startDate;
-
-		return $this;
-	}
-
 	public function getEndDate(): ?\DateTimeInterface
 	{
 		return $this->endDate;
-	}
-
-	public function setEndDate(\DateTimeInterface $endDate): self
-	{
-		$this->endDate = $endDate;
-
-		return $this;
 	}
 
 	public function getCategory(): ?Category
@@ -146,11 +164,6 @@ abstract class Offer
 		return $this;
 	}
 
-	public function getCreationDate(): ?\DateTimeInterface
-	{
-		return $this->creationDate;
-	}
-
 	public function getPictures(): ?array
 	{
 		return $this->pictures;
@@ -171,6 +184,42 @@ abstract class Offer
 	public function setLocations(array $locations): self
 	{
 		$this->locations = $locations;
+
+		return $this;
+	}
+
+	public function getTitle(): ?string
+	{
+		return $this->title;
+	}
+
+	public function setTitle(string $title): self
+	{
+		$this->title = $title;
+
+		return $this;
+	}
+
+	public function getDescription(): ?string
+	{
+		return $this->description;
+	}
+
+	public function setDescription(string $description): self
+	{
+		$this->description = $description;
+
+		return $this;
+	}
+
+	public function getKeywords(): ?array
+	{
+		return $this->keywords;
+	}
+
+	public function setKeywords(?array $keywords): self
+	{
+		$this->keywords = $keywords;
 
 		return $this;
 	}

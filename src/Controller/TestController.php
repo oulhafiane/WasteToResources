@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\CurrentUser;
 use App\Entity\User;
 use App\Entity\Picker;
 use App\Entity\SaleOffer;
@@ -19,28 +20,12 @@ class TestController extends AbstractController
 		$this->serializer = $serializer;
 	}
 
-	private function getCurrentUser()
-	{
-
-		if (!$this->has('security.token_storage')) {
-			throw new \LogicException('The Security Bundle is not registered in your application.');
-		}
-		if (null === $token = $this->get('security.token_storage')->getToken()) {
-			return;
-		}
-		if (!is_object($user = $token->getUser())) {
-			// e.g. anonymous authentication
-			return;
-		}
-		return $user;
-	}
-
 	/**
 	 * @Route("/api/test", name="test", methods={"GET"})
 	 */
-	public function testAction()
+	public function testAction(CurrentUser $cr)
 	{
-		$current_user = $this->getCurrentUser();
+		$current_user = $cr->getCurrentUser($this);
 		$response = new Response("Very good you are logged and you are a : ".get_class($current_user));
 
 		return $response;

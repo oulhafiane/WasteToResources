@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\FormHandler;
 use App\Entity\User;
 use App\Entity\Picker;
 use App\Entity\Reseller;
@@ -17,83 +18,52 @@ class RegistrationController extends AbstractController
 {
 	private $encoder;
 	private $validator;
+	private $form;
 
-	public function __construct(UserPasswordEncoderInterface $encoder, ValidatorInterface $validator)
+	public function __construct(UserPasswordEncoderInterface $encoder, ValidatorInterface $validator, FormHandler $form)
 	{
 		$this->encoder = $encoder;
 		$this->validator = $validator;
+		$this->form = $form;
 	}
 
-	private function register(Request $request, User $user)
+	public function setPassword($user, $form)
 	{
-		$data = json_decode($request->getContent(), true);
-		$code = 401;
-		$message = "Unauthorized";
-
-		if (!is_null($data))
-		{
-			$form = $this->createForm(RegistrationFormType::class, $user);
-			$form->submit($data);
-			$violations = $this->validator->validate($user);
-			$errors = NULL;
-
-			if (count($violations) !== 0) {
-				$errors = [];
-				foreach ($violations as $violation) {
-					$errors[$violation->getPropertyPath()] = $violation->getMessage();
-				}
-			}
-			else {
-				$user->setPassword(
-					$this->encoder->encodePassword(
-						$user,
-						$form->get('password')->getData()
-					)
-				);
-
-				$em = $this->getDoctrine()->getManager();
-				$em->persist($user);
-				$em->flush();
-
-				$code = 201;
-				$message = 'User created successfully';
-			}
-		}
-
-		return $this->json([
-			'code' => $code,
-			'message' => $message,
-			'errors' => $errors
-		], $code);
+		$user->setPassword(
+			$this->encoder->encodePassword(
+				$user,
+				$form->get('password')->getData()
+			)
+		);
 	}
 
 	/**
-	 * @Route("/api/picker", name="register_picker", methods={"POST"})
+	 * @Route("/api/public/picker", name="register_picker", methods={"POST"})
 	 */
 	public function pickerAction(Request $request)
 	{
-		$picker = new Picker();
+		$user = new Picker();
 
-		return $this->register($request, $picker);
+		return $this->form->validate($request, $user, RegistrationFormType::class, array($this, 'setPassword'));
 	}
 
 	/**
-	 * @Route("/api/reseller", name="register_reseller", methods={"POST"})
+	 * @Route("/api/public/reseller", name="register_reseller", methods={"POST"})
 	 */
 	public function resellerAction(Request $request)
 	{
-		$reseller = new Reseller();
+		$user = new Reseller();
 
-		return $this->register($request, $reseller);
+		return $this->form->validate($request, $user, RegistrationFormType::class, array($this, 'setPassword'));
 	}
 
 	/**
-	 * @Route("/api/buyer", name="register_buyer", methods={"POST"})
+	 * @Route("/api/public/buyer", name="register_buyer", methods={"POST"})
 	 */
 	public function buyerAction(Request $request)
 	{
-		$buyer = new Buyer();
+		$user = new Buyer();
 
-		return $this->register($request, $buyer);
+		return $this->form->validate($request, $user, RegistrationFormType::class, array($this, 'setPassword'));
 	}
 }

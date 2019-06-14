@@ -23,7 +23,7 @@ class AuctionBid extends Offer
     private $bids;
 
     /**
-     * @ORM\Column(type="bigint")
+     * @ORM\Column(type="bigint", nullable=true)
      */
     private $end_price;
 

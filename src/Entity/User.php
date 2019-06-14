@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
- * ORM\DiscriminatorMap({"picker" = "Picker", "reseller" = "Resseller", "buyer" = "Buyer"})
+ * @ORM\DiscriminatorMap({"user" = "User", "picker" = "Picker", "reseller" = "Reseller", "buyer" = "Buyer"})
  */
 class User implements UserInterface
 {
@@ -26,6 +26,7 @@ class User implements UserInterface
 	/**
 	 * @ORM\Column(type="string", length=180, unique=true)
 	 * @Assert\NotBlank
+	 * @Assert\Email
 	 */
 	protected $email;
 
@@ -39,6 +40,7 @@ class User implements UserInterface
 	 * @ORM\Column(type="string")
 	 * @Assert\NotBlank
 	 * @Assert\Length(min=6, max=4096)
+	 * @Assert\NotCompromisedPassword
 	 */
 	protected $password;
 
@@ -69,6 +71,7 @@ class User implements UserInterface
 	/**
 	 * @ORM\Column(type="string", length=50)
 	 * @Assert\NotBlank
+	 * @Assert\Country
 	 */
 	protected $country;
 
@@ -135,6 +138,12 @@ class User implements UserInterface
 
 	public function __construct()
 	{
+		if ($this instanceOf Picker)
+			$this->roles[] = 'ROLE_PICKER';
+		else if ($this instanceOf Reseller)
+			$this->roles[] = 'ROLE_RESELLER';
+		else if ($this instanceOf Buyer)
+			$this->roles[] = 'ROLE_BUYER';
 		$this->subscriptionDate = new \DateTime();
 		$this->setBalance(0);
 		$this->setLoyaltyPoints(0);

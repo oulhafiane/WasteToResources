@@ -11,19 +11,8 @@ security:
                 class: App\Entity\User
                 property: email
     firewalls:
-        register_picker:
-            pattern:    ^/api/picker$
-            methods:	[POST]
-            stateless:  true
-            anonymous: true
-        register_reseller:
-            pattern:    ^/api/reseller$
-            methods:	[POST]
-            stateless:  true
-            anonymous: true
-        register_buyer:
-            pattern:    ^/api/buyer$
-            methods:	[POST]
+        public:
+            pattern:    ^/api/public/
             stateless:  true
             anonymous: true
         login:
@@ -54,8 +43,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/api/picker$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
-         - { path: ^/api/reseller$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
-         - { path: ^/api/buyer$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
-         - { path: ^/api/auth$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+         - { path: ^/api/public/, roles: IS_AUTHENTICATED_ANONYMOUSLY}
+         - { path: ^/api/offer/sale$, roles: ROLE_PICKER, methods: [POST] }
+         - { path: ^/api/offer/purchase$, roles: ROLE_RESELLER, methods: [POST] }
+         - { path: ^/api/offer/bulk_purchase$, roles: ROLE_BUYER, methods: [POST] }
+         - { path: ^/api/offer/auction$, roles: ROLE_RESELLER, methods: [POST] }
          - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
