@@ -3,9 +3,11 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\SaleOfferRepository")
+ * @Serializer\ExclusionPolicy("ALL")
  */
 class SaleOffer extends Offer
 {

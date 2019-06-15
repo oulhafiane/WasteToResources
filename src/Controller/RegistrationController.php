@@ -7,14 +7,12 @@ use App\Entity\User;
 use App\Entity\Picker;
 use App\Entity\Reseller;
 use App\Entity\Buyer;
-use App\Form\RegistrationFormType;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class RegistrationController extends AbstractController
+class RegistrationController
 {
 	private $encoder;
 	private $validator;
@@ -27,43 +25,21 @@ class RegistrationController extends AbstractController
 		$this->form = $form;
 	}
 
-	public function setPassword($user, $form)
+	public function setPassword($user)
 	{
 		$user->setPassword(
 			$this->encoder->encodePassword(
 				$user,
-				$form->get('password')->getData()
+				$user->getPassword()
 			)
 		);
 	}
 
 	/**
-	 * @Route("/api/public/picker", name="register_picker", methods={"POST"})
+	 * @Route("/api/register", name="register_user", methods={"POST"})
 	 */
-	public function pickerAction(Request $request)
+	public function registerAction(Request $request)
 	{
-		$user = new Picker();
-
-		return $this->form->validate($request, $user, RegistrationFormType::class, array($this, 'setPassword'));
-	}
-
-	/**
-	 * @Route("/api/public/reseller", name="register_reseller", methods={"POST"})
-	 */
-	public function resellerAction(Request $request)
-	{
-		$user = new Reseller();
-
-		return $this->form->validate($request, $user, RegistrationFormType::class, array($this, 'setPassword'));
-	}
-
-	/**
-	 * @Route("/api/public/buyer", name="register_buyer", methods={"POST"})
-	 */
-	public function buyerAction(Request $request)
-	{
-		$user = new Buyer();
-
-		return $this->form->validate($request, $user, RegistrationFormType::class, array($this, 'setPassword'));
+		return $this->form->validate($request, NULL, User::class, array($this, 'setPassword'));
 	}
 }

@@ -6,6 +6,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints AS Assert;
+use JMS\Serializer\Annotation\Type;
+use JMS\Serializer\Annotation\SerializedName;
 
 /**
  * @ORM\MappedSuperclass
@@ -39,11 +41,14 @@ abstract class Offer
 	 * @ORM\Column(type="integer")
 	 * @Assert\NotBlank
 	 * @Assert\Positive
+	 * @Type("integer")
 	 */
 	protected $price;
 
 	/**
 	 * @ORM\Column(type="boolean")
+	 * @Type("bool")
+	 * @SerializedName("withTransport")
 	 */
 	protected $withTransport;
 
@@ -60,6 +65,7 @@ abstract class Offer
 	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\Category")
 	 * @ORM\JoinColumn(nullable=false)
+	 * @Type("App\Entity\Category")
 	 */
 	protected $category;
 
@@ -67,27 +73,25 @@ abstract class Offer
 	 * @ORM\Column(type="bigint")
 	 * @Assert\NotBlank
 	 * @Assert\Positive
+	 * @Type("integer")
 	 */
 	protected $weight;
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
+	 * @Type("array")
 	 */
 	protected $pictures = [];
 
 	/**
-	 * @ORM\Column(type="array")
-	 * @Assert\Type(
-	 *	type = "array"
-	 * )
+	 * @ORM\Column(type="array", nullable=true)
+	 * @Type("array")
 	 */
 	protected $locations = [];
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
-	 * @Assert\Type(
-	 *	type = "array"
-	 * )
+	 * @Type("array")
 	 */
 	private $keywords = [];
 
@@ -181,7 +185,7 @@ abstract class Offer
 		return $this->locations;
 	}
 
-	public function setLocations(array $locations): self
+	public function setLocations(?array $locations): self
 	{
 		$this->locations = $locations;
 

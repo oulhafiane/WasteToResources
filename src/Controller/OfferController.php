@@ -14,7 +14,6 @@ use App\Entity\SaleOffer;
 use App\Entity\PurchaseOffer;
 use App\Entity\BulkPurchaseOffer;
 use App\Entity\AuctionBid;
-use App\Form\OfferFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,7 +35,7 @@ class OfferController extends AbstractController
 		$this->cr = $cr;
 	}
 
-	public function setOwner($offer, $form)
+	public function setOwner($offer)
 	{
 		$offer->setOwner($this->cr->getCurrentUser($this));
 	}
@@ -50,7 +49,7 @@ class OfferController extends AbstractController
 		if ($user instanceOf Picker)
 		{
 			$offer = new SaleOffer();
-			return $form->validate($request, $offer, OfferFormType::class, array($this, 'setOwner'));
+			return $form->validate($request, $offer, SaleOffer::class, array($this, 'setOwner'));
 		}
 
 		return $this->json([
@@ -69,7 +68,7 @@ class OfferController extends AbstractController
 		if ($user instanceOf Reseller)
 		{
 			$offer = new PurchaseOffer();
-			return $form->validate($request, $offer, OfferFormType::class, array($this, 'setOwner'));
+			return $form->validate($request, $offer, PurchaseOffer::class, array($this, 'setOwner'));
 		}
 
 		return $this->json([
@@ -88,7 +87,7 @@ class OfferController extends AbstractController
 		if ($user instanceOf Buyer)
 		{
 			$offer = new BulkPurchaseOffer();
-			return $form->validate($request, $offer, OfferFormType::class, array($this, 'setOwner'));
+			return $form->validate($request, $offer, BulkPurchaseOffer::class, array($this, 'setOwner'));
 		}
 
 		return $this->json([
@@ -107,7 +106,7 @@ class OfferController extends AbstractController
 		if ($user instanceOf Reseller)
 		{
 			$offer = new AuctionBid();
-			return $form->validate($request, $offer, OfferFormType::class, array($this, 'setOwner'));
+			return $form->validate($request, $offer, AuctionBid::class, array($this, 'setOwner'));
 		}
 
 		return $this->json([
@@ -161,7 +160,7 @@ class OfferController extends AbstractController
 	 */
 	public function listBulkPurchaseOffersAction()
 	{
-		$offers = $this->getDoctrine()->getRepository(BulkPurchase::class)->findAll();
+		$offers = $this->getDoctrine()->getRepository(BulkPurchaseOffer::class)->findAll();
 		$data = $this->serializer->serialize($offers, 'json');
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');

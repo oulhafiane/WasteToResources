@@ -288,9 +288,6 @@
             ".env"
         ]
     },
-    "symfony/form": {
-        "version": "v4.3.1"
-    },
     "symfony/framework-bundle": {
         "version": "4.2",
         "recipe": {
@@ -338,9 +335,6 @@
         }
     },
     "symfony/mime": {
-        "version": "v4.3.1"
-    },
-    "symfony/options-resolver": {
         "version": "v4.3.1"
     },
     "symfony/orm-pack": {

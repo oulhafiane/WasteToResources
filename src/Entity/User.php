@@ -7,14 +7,17 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use JMS\Serializer\Annotation\SerializedName;
+use JMS\Serializer\Annotation\Discriminator;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
- * @ORM\DiscriminatorMap({"user" = "User", "picker" = "Picker", "reseller" = "Reseller", "buyer" = "Buyer"})
+ * @ORM\DiscriminatorMap({"picker" = "Picker", "reseller" = "Reseller", "buyer" = "Buyer"})
+ * @Discriminator(field = "type", disabled = false, map = {"picker" = "App\Entity\Picker", "reseller": "App\Entity\Reseller", "buyer": "App\Entity\Buyer"})
  */
-class User implements UserInterface
+abstract class User implements UserInterface
 {
 	/**
 	 * @ORM\Id()
@@ -47,12 +50,14 @@ class User implements UserInterface
 	/**
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
+	 * @SerializedName("firstName")
 	 */
 	protected $firstName;
 
 	/**
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
+	 * @SerializedName("lastName")
 	 */
 	protected $lastName;
 

@@ -15,6 +15,10 @@ security:
             pattern:    ^/api/public/
             stateless:  true
             anonymous: true
+        register:
+            pattern:    ^/api/register$
+            stateless:  true
+            anonymous: true
         login:
             pattern:    ^/api/auth$
             stateless:  true
@@ -44,6 +48,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
          - { path: ^/api/public/, roles: IS_AUTHENTICATED_ANONYMOUSLY}
+         - { path: ^/api/register$, roles: IS_AUTHENTICATED_ANONYMOUSLY}
          - { path: ^/api/offer/sale$, roles: ROLE_PICKER, methods: [POST] }
          - { path: ^/api/offer/purchase$, roles: ROLE_RESELLER, methods: [POST] }
          - { path: ^/api/offer/bulk_purchase$, roles: ROLE_BUYER, methods: [POST] }
