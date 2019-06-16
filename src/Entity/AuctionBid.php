@@ -16,6 +16,7 @@ class AuctionBid extends Offer
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Reseller", inversedBy="auctionBids")
      * @ORM\JoinColumn(nullable=false)
+	 * @Serializer\Expose
      */
     private $owner;
 

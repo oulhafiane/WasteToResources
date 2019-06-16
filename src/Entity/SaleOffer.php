@@ -14,6 +14,7 @@ class SaleOffer extends Offer
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Picker", inversedBy="saleOffers")
      * @ORM\JoinColumn(nullable=false)
+	 * @Serializer\Expose
      */
     private $owner;
 

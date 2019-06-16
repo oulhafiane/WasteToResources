@@ -11,8 +11,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class RegistrationController
+class RegistrationController extends AbstractController
 {
 	private $encoder;
 	private $validator;
@@ -40,6 +41,13 @@ class RegistrationController
 	 */
 	public function registerAction(Request $request)
 	{
-		return $this->form->validate($request, NULL, User::class, array($this, 'setPassword'));
+		if ($this->form->checkId($request))
+			return $this->form->validate($request, NULL, User::class, array($this, 'setPassword'));
+		else
+			return $this->json([
+				'code' => 401,
+				'message' => 'Unauthorized',
+				'errors' => NULL
+			], 401);
 	}
 }

@@ -7,15 +7,15 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use JMS\Serializer\Annotation\SerializedName;
-use JMS\Serializer\Annotation\Discriminator;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({"picker" = "Picker", "reseller" = "Reseller", "buyer" = "Buyer"})
- * @Discriminator(field = "type", disabled = false, map = {"picker" = "App\Entity\Picker", "reseller": "App\Entity\Reseller", "buyer": "App\Entity\Buyer"})
+ * @Serializer\Discriminator(field = "type", disabled = false, map = {"picker" = "App\Entity\Picker", "reseller": "App\Entity\Reseller", "buyer": "App\Entity\Buyer"})
+ * @Serializer\ExclusionPolicy("ALL")
  */
 abstract class User implements UserInterface
 {
@@ -23,6 +23,7 @@ abstract class User implements UserInterface
 	 * @ORM\Id()
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
+	 * @Assert\IsNull
 	 */
 	protected $id;
 
@@ -30,11 +31,13 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=180, unique=true)
 	 * @Assert\NotBlank
 	 * @Assert\Email
+	 * @Serializer\Expose
 	 */
 	protected $email;
 
 	/**
 	 * @ORM\Column(type="json")
+	 * @Serializer\Expose
 	 */
 	protected $roles = [];
 
@@ -50,26 +53,30 @@ abstract class User implements UserInterface
 	/**
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
-	 * @SerializedName("firstName")
+	 * @Serializer\SerializedName("firstName")
+	 * @Serializer\Expose
 	 */
 	protected $firstName;
 
 	/**
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
-	 * @SerializedName("lastName")
+	 * @Serializer\SerializedName("lastName")
+	 * @Serializer\Expose
 	 */
 	protected $lastName;
 
 	/**
 	 * @ORM\Column(type="string", length=50)
 	 * @Assert\NotBlank
+	 * @Serializer\Expose
 	 */
 	protected $city;
 
 	/**
 	 * @ORM\Column(type="text")
 	 * @Assert\NotBlank
+	 * @Serializer\Expose
 	 */
 	protected $address;
 
@@ -77,12 +84,14 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=50)
 	 * @Assert\NotBlank
 	 * @Assert\Country
+	 * @Serializer\Expose
 	 */
 	protected $country;
 
 	/**
 	 * @ORM\Column(type="string", length=20)
 	 * @Assert\NotBlank
+	 * @Serializer\Expose
 	 */
 	protected $phone;
 
