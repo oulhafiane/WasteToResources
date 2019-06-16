@@ -41,13 +41,7 @@ class RegistrationController extends AbstractController
 	 */
 	public function registerAction(Request $request)
 	{
-		if ($this->form->checkId($request))
-			return $this->form->validate($request, NULL, User::class, array($this, 'setPassword'));
-		else
-			return $this->json([
-				'code' => 401,
-				'message' => 'Unauthorized',
-				'errors' => NULL
-			], 401);
+		$this->form->checkId($request);
+		return $this->form->validate($request, NULL, User::class, array($this, 'setPassword'));
 	}
 }

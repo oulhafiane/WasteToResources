@@ -4,14 +4,14 @@ namespace App\EventListener;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use Symfony\Component\HttpKernel\Event\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class ExceptionListener
 {
 	public function onKernelException(GetResponseForExceptionEvent $event)
 	{
 		$exception = $event->getException();
-		if ($exception instanceOf HttpExceptionInterface)
+		if ($exception instanceof HttpExceptionInterface)
 			$code = $exception->getStatusCode();
 		else
 			$code = 500;

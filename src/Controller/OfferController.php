@@ -15,6 +15,7 @@ use App\Entity\PurchaseOffer;
 use App\Entity\BulkPurchaseOffer;
 use App\Entity\AuctionBid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -45,6 +46,7 @@ class OfferController extends AbstractController
 	 */
 	public function createSaleOfferAction(Request $request, FormHandler $form)
 	{
+		$form->checkId($request);
 		$user = $this->cr->getCurrentUser($this);
 		if ($user instanceOf Picker)
 		{
@@ -64,6 +66,7 @@ class OfferController extends AbstractController
 	 */
 	public function createPurchaseOfferAction(Request $request, FormHandler $form)
 	{
+		$form->checkId($request);
 		$user = $this->cr->getCurrentUser($this);
 		if ($user instanceOf Reseller)
 		{
@@ -83,6 +86,7 @@ class OfferController extends AbstractController
 	 */
 	public function createBulkPurchaseOfferAction(Request $request, FormHandler $form)
 	{
+		$form->checkId($request);
 		$user = $this->cr->getCurrentUser($this);
 		if ($user instanceOf Buyer)
 		{
@@ -102,6 +106,7 @@ class OfferController extends AbstractController
 	 */
 	public function createAuctionOfferAction(Request $request, FormHandler $form)
 	{
+		$form->checkId($request);
 		$user = $this->cr->getCurrentUser($this);
 		if ($user instanceOf Reseller)
 		{
@@ -135,7 +140,7 @@ class OfferController extends AbstractController
 	public function listSaleOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(SaleOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json');
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -148,7 +153,7 @@ class OfferController extends AbstractController
 	public function listPurchaseOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(PurchaseOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json');
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -161,7 +166,7 @@ class OfferController extends AbstractController
 	public function listBulkPurchaseOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(BulkPurchaseOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json');
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -174,7 +179,7 @@ class OfferController extends AbstractController
 	public function listAuctionOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(AuctionBid::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json');
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 

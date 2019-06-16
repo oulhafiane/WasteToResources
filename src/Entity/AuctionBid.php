@@ -9,14 +9,13 @@ use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\AuctionBidRepository")
- * @Serializer\ExclusionPolicy("ALL")
  */
 class AuctionBid extends Offer
 {
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Reseller", inversedBy="auctionBids")
      * @ORM\JoinColumn(nullable=false)
-	 * @Serializer\Expose
+	 * @Serializer\Groups("offer")
      */
     private $owner;
 
@@ -27,6 +26,8 @@ class AuctionBid extends Offer
 
     /**
      * @ORM\Column(type="bigint", nullable=true)
+	 * @Serializer\Type("integer")
+	 * @Serializer\Groups("offer")
      */
     private $end_price;
 

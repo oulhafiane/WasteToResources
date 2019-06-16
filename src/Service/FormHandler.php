@@ -5,6 +5,7 @@ namespace App\Service;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use JMS\Serializer\SerializerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -25,10 +26,8 @@ class FormHandler
 	public function checkId(Request $request)
 	{
 		$data = json_decode($request->getContent(), true);
-		if (null !== $data & !array_key_exists('id', $data))
-			return true;
-		else
-			return false;
+		if (null !== $data && array_key_exists('id', $data))
+			throw new HttpException(406, 'Field \'id\' not acceptable.');
 	}
 
 	public function validate(Request $request, $object, $class, $callBack)

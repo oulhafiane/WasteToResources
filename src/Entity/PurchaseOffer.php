@@ -5,18 +5,17 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\PurchaseOfferRepository")
- * @Serializer\ExclusionPolicy("ALL")
  */
 class PurchaseOffer extends Offer
 {
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Reseller", inversedBy="purchaseOffers")
      * @ORM\JoinColumn(nullable=false)
-	 * @Serializer\Expose
+	 * @Groups("offer")
      */
     private $owner;
 

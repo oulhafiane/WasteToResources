@@ -3,18 +3,17 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\SaleOfferRepository")
- * @Serializer\ExclusionPolicy("ALL")
  */
 class SaleOffer extends Offer
 {
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Picker", inversedBy="saleOffers")
      * @ORM\JoinColumn(nullable=false)
-	 * @Serializer\Expose
+	 * @Groups({"offer"})
      */
     private $owner;
 

@@ -15,7 +15,6 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({"picker" = "Picker", "reseller" = "Reseller", "buyer" = "Buyer"})
  * @Serializer\Discriminator(field = "type", disabled = false, map = {"picker" = "App\Entity\Picker", "reseller": "App\Entity\Reseller", "buyer": "App\Entity\Buyer"})
- * @Serializer\ExclusionPolicy("ALL")
  */
 abstract class User implements UserInterface
 {
@@ -31,13 +30,12 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=180, unique=true)
 	 * @Assert\NotBlank
 	 * @Assert\Email
-	 * @Serializer\Expose
+	 * @Serializer\Groups("offer")
 	 */
 	protected $email;
 
 	/**
 	 * @ORM\Column(type="json")
-	 * @Serializer\Expose
 	 */
 	protected $roles = [];
 
@@ -54,7 +52,7 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
 	 * @Serializer\SerializedName("firstName")
-	 * @Serializer\Expose
+	 * @Serializer\Groups("offer")
 	 */
 	protected $firstName;
 
@@ -62,21 +60,19 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
 	 * @Serializer\SerializedName("lastName")
-	 * @Serializer\Expose
+	 * @Serializer\Groups("offer")
 	 */
 	protected $lastName;
 
 	/**
 	 * @ORM\Column(type="string", length=50)
 	 * @Assert\NotBlank
-	 * @Serializer\Expose
 	 */
 	protected $city;
 
 	/**
 	 * @ORM\Column(type="text")
 	 * @Assert\NotBlank
-	 * @Serializer\Expose
 	 */
 	protected $address;
 
@@ -84,14 +80,13 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=50)
 	 * @Assert\NotBlank
 	 * @Assert\Country
-	 * @Serializer\Expose
 	 */
 	protected $country;
 
 	/**
 	 * @ORM\Column(type="string", length=20)
 	 * @Assert\NotBlank
-	 * @Serializer\Expose
+	 * @Serializer\Groups("offer")
 	 */
 	protected $phone;
 

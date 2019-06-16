@@ -6,8 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints AS Assert;
-use JMS\Serializer\Annotation\Type;
-use JMS\Serializer\Annotation\SerializedName;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\MappedSuperclass
@@ -28,12 +27,14 @@ abstract class Offer
 	 *	min = 5,
 	 *	max = 20
 	 * )
+	 * @Serializer\Groups({"offer"})
 	 */
 	private $title;
 
 	/**
 	 * @ORM\Column(type="text")
 	 * @Assert\NotBlank
+	 * @Serializer\Groups({"offer"})
 	 */
 	private $description;
 
@@ -41,31 +42,36 @@ abstract class Offer
 	 * @ORM\Column(type="integer")
 	 * @Assert\NotBlank
 	 * @Assert\Positive
-	 * @Type("integer")
+	 * @Serializer\Type("integer")
+	 * @Serializer\Groups({"offer"})
 	 */
 	protected $price;
 
 	/**
 	 * @ORM\Column(type="boolean")
-	 * @Type("bool")
-	 * @SerializedName("withTransport")
+	 * @Serializer\Type("bool")
+	 * @Serializer\SerializedName("withTransport")
+	 * @Serializer\Groups({"offer"})
 	 */
 	protected $withTransport;
 
 	/**
 	 * @ORM\Column(type="datetime")
+	 * @Serializer\Groups({"offer"})
 	 */
 	protected $startDate;
 
 	/**
 	 * @ORM\Column(type="datetime")
+	 * @Serializer\Groups({"offer"})
 	 */
 	protected $endDate;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\Category")
 	 * @ORM\JoinColumn(nullable=false)
-	 * @Type("App\Entity\Category")
+	 * @Serializer\Type("App\Entity\Category")
+	 * @Serializer\Groups({"offer"})
 	 */
 	protected $category;
 
@@ -73,25 +79,29 @@ abstract class Offer
 	 * @ORM\Column(type="bigint")
 	 * @Assert\NotBlank
 	 * @Assert\Positive
-	 * @Type("integer")
+	 * @Serializer\Type("integer")
+	 * @Serializer\Groups({"offer"})
 	 */
 	protected $weight;
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
-	 * @Type("array")
+	 * @Serializer\Type("array")
+	 * @Serializer\Groups({"offer"})
 	 */
 	protected $pictures = [];
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
-	 * @Type("array")
+	 * @Serializer\Type("array")
+	 * @Serializer\Groups({"offer"})
 	 */
 	protected $locations = [];
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
-	 * @Type("array")
+	 * @Serializer\Type("array")
+	 * @Serializer\Groups({"offer"})
 	 */
 	private $keywords = [];
 
