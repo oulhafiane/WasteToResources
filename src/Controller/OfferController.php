@@ -147,6 +147,19 @@ class OfferController extends AbstractController
 	}
 
 	/**
+	 * @Route("/api/public/offers", name="list_offers", methods={"GET"})
+	 */
+	public function listOffersAction()
+	{
+		$offers = $this->getDoctrine()->getRepository(Offer::class)->findAll();
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
+		$response = new Response($data);
+		$response->headers->set('Content-Type', 'application/json');
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/api/public/offers/sale", name="list_sale_offers", methods={"GET"})
 	 */
 	public function listSaleOffersAction()

@@ -13,7 +13,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({"sale" = "SaleOffer", "purchase" = "PurchaseOffer", "BulkPurchaseOffer" = "BulkPurchaseOffer", "auction" = "AuctionBid"})
- * Serializer\Discriminator(field = "typeee", disabled = false, map = {"sale" = "App\Entity\SaleOffer", "purchase": "App\Entity\PurchaseOffer", "BulkPurchaseOffer": "App\Entity\BulkPurchaseOffer", "auction": "App\Entity\AuctionBid"})
+ * @Serializer\Discriminator(field = "type", disabled = false, map = {"sale" = "App\Entity\SaleOffer", "purchase": "App\Entity\PurchaseOffer", "BulkPurchaseOffer": "App\Entity\BulkPurchaseOffer", "auction": "App\Entity\AuctionBid"}, groups = {"offer"})
  */
 abstract class Offer
 {
