@@ -9,7 +9,11 @@ use Symfony\Component\Validator\Constraints AS Assert;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * @ORM\MappedSuperclass
+ * @ORM\Entity(repositoryClass="App\Repository\OfferRepository")
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="type", type="string")
+ * @ORM\DiscriminatorMap({"sale" = "SaleOffer", "purchase" = "PurchaseOffer", "BulkPurchaseOffer" = "BulkPurchaseOffer", "auction" = "AuctionBid"})
+ * Serializer\Discriminator(field = "typeee", disabled = false, map = {"sale" = "App\Entity\SaleOffer", "purchase": "App\Entity\PurchaseOffer", "BulkPurchaseOffer": "App\Entity\BulkPurchaseOffer", "auction": "App\Entity\AuctionBid"})
  */
 abstract class Offer
 {
@@ -18,8 +22,10 @@ abstract class Offer
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
 	 * @Serializer\Groups({"offer"})
+	 * @Assert\IsNull
+	 * @Serializer\ReadOnly
 	 */
-	private $id;
+	protected $id;
 
 	/**
 	 * @ORM\Column(type="string", length=25)
@@ -30,14 +36,14 @@ abstract class Offer
 	 * )
 	 * @Serializer\Groups({"offer"})
 	 */
-	private $title;
+	protected $title;
 
 	/**
 	 * @ORM\Column(type="text")
 	 * @Assert\NotBlank
 	 * @Serializer\Groups({"offer"})
 	 */
-	private $description;
+	protected $description;
 
 	/**
 	 * @ORM\Column(type="integer")
@@ -69,14 +75,6 @@ abstract class Offer
 	protected $endDate;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\Category")
-	 * @ORM\JoinColumn(nullable=false)
-	 * @Serializer\Type("App\Entity\Category")
-	 * @Serializer\Groups({"offer"})
-	 */
-	protected $category;
-
-	/**
 	 * @ORM\Column(type="bigint")
 	 * @Assert\NotBlank
 	 * @Assert\Positive
@@ -90,13 +88,6 @@ abstract class Offer
 	 * @Serializer\Type("array")
 	 * @Serializer\Groups({"offer"})
 	 */
-	protected $pictures = [];
-
-	/**
-	 * @ORM\Column(type="array", nullable=true)
-	 * @Serializer\Type("array")
-	 * @Serializer\Groups({"offer"})
-	 */
 	protected $locations = [];
 
 	/**
@@ -104,7 +95,22 @@ abstract class Offer
 	 * @Serializer\Type("array")
 	 * @Serializer\Groups({"offer"})
 	 */
-	private $keywords = [];
+	protected $keywords = [];
+
+	/**
+	 * @ORM\OneToMany(targetEntity="App\Entity\Photo", mappedBy="offer", cascade={"persist"})
+	 * @Serializer\Type("ArrayCollection<App\Entity\Photo>")
+	 * @Serializer\Groups({"offer"})
+	 */
+	protected $photos;
+
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="offers")
+	 * @ORM\JoinColumn(nullable=false)
+	 * @Serializer\Type("App\Entity\Category")
+	 * @Serializer\Groups({"offer"})
+	 */
+	protected $category;
 
 	public function __construct()
 	{
@@ -114,6 +120,7 @@ abstract class Offer
 			$this->endDate = new \DateTime(date("Y-m-d h:i:s", strtotime("+7 day")));
 		else
 			$this->endDate = new \DateTime(date("Y-m-d h:i:s", strtotime("+30 day")));
+	//	$this->photos = new ArrayCollection();
 	}
 
 	public function getId(): ?int
@@ -155,18 +162,6 @@ abstract class Offer
 		return $this->endDate;
 	}
 
-	public function getCategory(): ?Category
-	{
-		return $this->category;
-	}
-
-	public function setCategory(?Category $category): self
-	{
-		$this->category = $category;
-
-		return $this;
-	}
-
 	public function getWeight(): ?int
 	{
 		return $this->weight;
@@ -175,18 +170,6 @@ abstract class Offer
 	public function setWeight(int $weight): self
 	{
 		$this->weight = $weight;
-
-		return $this;
-	}
-
-	public function getPictures(): ?array
-	{
-		return $this->pictures;
-	}
-
-	public function setPictures(?array $pictures): self
-	{
-		$this->pictures = $pictures;
 
 		return $this;
 	}
@@ -235,6 +218,49 @@ abstract class Offer
 	public function setKeywords(?array $keywords): self
 	{
 		$this->keywords = $keywords;
+
+		return $this;
+	}
+
+	/**
+	 * @return Collection|Photo[]
+	 */
+	public function getPhotos()
+	{
+		return $this->photos;
+	}
+
+	public function addPhoto(Photo $photo): self
+	{
+		if (!$this->photos->contains($photo)) {
+			$this->photos[] = $photo;
+			$photo->setOffer($this);
+		}
+
+		return $this;
+	}
+
+	public function removePhoto(Photo $photo): self
+	{
+		if ($this->photos->contains($photo)) {
+			$this->photos->removeElement($photo);
+			// set the owning side to null (unless already changed)
+			if ($photo->getOffer() === $this) {
+				$photo->setOffer(null);
+			}
+		}
+
+		return $this;
+	}
+
+	public function getCategory(): ?Category
+	{
+		return $this->category;
+	}
+
+	public function setCategory(?Category $category): self
+	{
+		$this->category = $category;
 
 		return $this;
 	}

@@ -14,6 +14,8 @@ use App\Entity\SaleOffer;
 use App\Entity\PurchaseOffer;
 use App\Entity\BulkPurchaseOffer;
 use App\Entity\AuctionBid;
+use App\Helper\UploadedBase64EncodedFile;
+use App\Helper\Base64EncodedFile;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class OfferController extends AbstractController
 {
@@ -39,6 +42,15 @@ class OfferController extends AbstractController
 	public function setOwner($offer)
 	{
 		$offer->setOwner($this->cr->getCurrentUser($this));
+		$photos = $offer->getPhotos();
+		if (null === $photos)
+			return ;
+		foreach($photos as $photo) {
+			$file = new UploadedBase64EncodedFile(new Base64EncodedFile($photo->getFile()));
+			$photo->setFile($file);
+			$photo->setOffer($offer);
+			$photo->setLink('/images/offers/'.$file->getClientOriginalName());
+		}
 	}
 
 	/**

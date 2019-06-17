@@ -23,6 +23,7 @@ abstract class User implements UserInterface
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
 	 * @Assert\IsNull
+	 * @Serializer\ReadOnly
 	 */
 	protected $id;
 
