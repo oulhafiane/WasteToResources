@@ -17,6 +17,7 @@ abstract class Offer
 	 * @ORM\Id()
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
+	 * @Serializer\Groups({"offer"})
 	 */
 	private $id;
 

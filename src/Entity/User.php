@@ -30,7 +30,6 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=180, unique=true)
 	 * @Assert\NotBlank
 	 * @Assert\Email
-	 * @Serializer\Groups("offer")
 	 */
 	protected $email;
 
@@ -52,7 +51,6 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank
 	 * @Serializer\SerializedName("firstName")
-	 * @Serializer\Groups("offer")
 	 */
 	protected $firstName;
 
@@ -86,7 +84,6 @@ abstract class User implements UserInterface
 	/**
 	 * @ORM\Column(type="string", length=20)
 	 * @Assert\NotBlank
-	 * @Serializer\Groups("offer")
 	 */
 	protected $phone;
 
