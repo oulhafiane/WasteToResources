@@ -34,7 +34,7 @@ class FormHandler
 	{
 		$code = 401;
 		$message = "Unauthorized";
-		$errors = NULL;
+		$extras = NULL;
 
 		try {
 			$object = $this->serializer->deserialize($request->getContent(), $class, 'json');
@@ -45,7 +45,7 @@ class FormHandler
 
 				if (count($violations) !== 0) {
 					foreach ($violations as $violation) {
-						$errors[$violation->getPropertyPath()] = $violation->getMessage();
+						$extras[$violation->getPropertyPath()] = $violation->getMessage();
 					}
 				}
 				else {
@@ -56,12 +56,13 @@ class FormHandler
 
 					$code = 201;
 					$message = substr(strrchr($class, "\\"), 1).' created successfully';
+					$extras['id'] = $object->getId();
 				}
 			}
 		}catch (UniqueConstraintViolationException $ex) {
-			$errors['email'] = 'This value is already used.';
+			$extras['email'] = 'This value is already used.';
 		}catch (\LogicException $ex) {
-			$errors['type'] = 'This value should not be blank.';
+			$extras['type'] = 'This value should not be blank.';
 		}catch (\Exception $ex) {
 			$code = 400;
 			$message = $ex->getMessage();
@@ -70,7 +71,7 @@ class FormHandler
 		return new JsonResponse([
 			'code' => $code,
 			'message' => $message,
-			'errors' => $errors
+			'extras' => $extras
 		], $code);
 	}
 }

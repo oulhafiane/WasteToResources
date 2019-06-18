@@ -22,21 +22,24 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class OfferController extends AbstractController
 {
 	private $serializer;
 	private $validator;
 	private $cr;
+	private $params;
 
-	public function __construct(SerializerInterface $serializer, ValidatorInterface $validator, CurrentUser $cr)
+	public function __construct(SerializerInterface $serializer, ValidatorInterface $validator, CurrentUser $cr, ParameterBagInterface $params)
 	{
 		$this->serializer = $serializer;
 		$this->validator = $validator;
 		$this->cr = $cr;
+		$this->params = $params;
 	}
 
 	public function setOwner($offer)
@@ -49,7 +52,7 @@ class OfferController extends AbstractController
 			$file = new UploadedBase64EncodedFile(new Base64EncodedFile($photo->getFile()));
 			$photo->setFile($file);
 			$photo->setOffer($offer);
-			$photo->setLink('/images/offers/'.$file->getClientOriginalName());
+			$photo->setLink($this->params->get('uploads_base_url').'/'.$file->getClientOriginalName());
 		}
 	}
 
@@ -69,7 +72,7 @@ class OfferController extends AbstractController
 		return $this->json([
 			'code' => 401,
 			'message' => 'Unauthorized',
-			'errors' => ['Role' => 'You are not picker']
+			'extras' => ['Role' => 'You are not picker']
 		], 401);
 	}
 
@@ -89,7 +92,7 @@ class OfferController extends AbstractController
 		return $this->json([
 			'code' => 401,
 			'message' => 'Unauthorized',
-			'errors' => ['Role' => 'You are not reseller']
+			'extras' => ['Role' => 'You are not reseller']
 		], 401);
 	}
 
@@ -109,7 +112,7 @@ class OfferController extends AbstractController
 		return $this->json([
 			'code' => 401,
 			'message' => 'Unauthorized',
-			'errors' => ['Role' => 'You are not buyer']
+			'extras' => ['Role' => 'You are not buyer']
 		], 401);
 	}
 
@@ -129,7 +132,7 @@ class OfferController extends AbstractController
 		return $this->json([
 			'code' => 401,
 			'message' => 'Unauthorized',
-			'errors' => ['Role' => 'You are not reseller']
+			'extras' => ['Role' => 'You are not reseller']
 		], 401);
 	}
 

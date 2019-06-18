@@ -1,7 +1,8 @@
 vich_uploader:
     db_driver: orm
+    storage: flysystem
 
     mappings:
         offer_photo:
             uri_prefix: /images/offers/
-            upload_destination: '%kernel.project_dir%/public/images/offers/'
+            upload_destination: offer_photo_fs
