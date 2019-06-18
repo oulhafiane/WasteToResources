@@ -34,6 +34,8 @@ class RegistrationController extends AbstractController
 				$user->getPassword()
 			)
 		);
+
+		return False;
 	}
 
 	/**

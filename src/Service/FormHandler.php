@@ -49,14 +49,15 @@ class FormHandler
 					}
 				}
 				else {
-					$callBack($object);
+					$showId = $callBack($object);
 
 					$this->entityManager->persist($object);
 					$this->entityManager->flush();
 
 					$code = 201;
 					$message = substr(strrchr($class, "\\"), 1).' created successfully';
-					$extras['id'] = $object->getId();
+					if ($showId === True)
+						$extras['id'] = $object->getId();
 				}
 			}
 		}catch (UniqueConstraintViolationException $ex) {

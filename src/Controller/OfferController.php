@@ -54,6 +54,8 @@ class OfferController extends AbstractController
 			$photo->setOffer($offer);
 			$photo->setLink($this->params->get('uploads_base_url').'/'.$file->getClientOriginalName());
 		}
+
+		return True;
 	}
 
 	/**
