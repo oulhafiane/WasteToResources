@@ -147,6 +147,9 @@
     "hoa/zformat": {
         "version": "1.17.01.10"
     },
+    "imagine/imagine": {
+        "version": "v0.7.1"
+    },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
@@ -189,6 +192,19 @@
         },
         "files": [
             "config/packages/lexik_jwt_authentication.yaml"
+        ]
+    },
+    "liip/imagine-bundle": {
+        "version": "1.8",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "1.8",
+            "ref": "1d42bc3f713130582e6e0c475c49bc327ab0a2a2"
+        },
+        "files": [
+            "config/packages/liip_imagine.yaml",
+            "config/routes/liip_imagine.yaml"
         ]
     },
     "mtdowling/jmespath.php": {
@@ -271,6 +287,9 @@
         "files": [
             "public/.htaccess"
         ]
+    },
+    "symfony/asset": {
+        "version": "v4.3.1"
     },
     "symfony/cache": {
         "version": "v4.3.1"
@@ -456,6 +475,19 @@
     },
     "symfony/templating": {
         "version": "v4.3.1"
+    },
+    "symfony/translation": {
+        "version": "3.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "3.3",
+            "ref": "1fb02a6e1c8f3d4232cce485c9afa868d63b115a"
+        },
+        "files": [
+            "config/packages/translation.yaml",
+            "translations/.gitignore"
+        ]
     },
     "symfony/translation-contracts": {
         "version": "v1.1.2"

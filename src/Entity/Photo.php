@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -18,13 +19,23 @@ class Photo
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
 	 * @Serializer\ReadOnly
+	 * @Assert\IsNull(groups={"Default", "new-photo"})
 	 */
 	private $id;
 
 	/**
 	 * @Vich\UploadableField(mapping="offer_photo", fileNameProperty="name", size="size")
 	 * @Serializer\Type("string")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer"})
+	 * @Assert\File(
+	 *	maxSize = "6M",
+	 *	mimeTypes = {
+	 *		"image/png",
+     *		"image/jpeg",
+	 *		"image/jpg"
+	 *	},
+	 *	groups={"new-photo"}
+	 * )
 	 */
 	private $file;
 
@@ -40,17 +51,19 @@ class Photo
 
 	/**
 	 * @ORM\Column(type="string", length=255)
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"list-offers"})
+	 * Assert\Url(groups={"new-photo"})
 	 */
 	private $link;
 
 	/**
-	 * @ORM\Column(type="datetime")
+	 * @ORM\Column(type="datetime", nullable=true)
 	 */
 	private $uploadAt;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\Offer", inversedBy="photos")
+	 * @Assert\NotBlank(groups={"new-photo"})
 	 */
 	private $offer;
 

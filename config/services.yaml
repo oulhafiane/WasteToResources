@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     uploads_base_url: 'https://%env(AWS_S3_BUCKET_NAME)%.s3.%env(AWS_S3_REGION_ID)%.amazonaws.com'
+    locale: 'en'
 
 services:
     # default configuration for services in *this* file
@@ -32,6 +33,9 @@ services:
     App\EventListener\ExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+    App\EventListener\PhotoSerializerListener:
+        tags:
+            - { name: jms_serializer.event_subscriber }
     Aws\S3\S3Client:
         arguments:
             -

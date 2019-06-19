@@ -52,9 +52,15 @@ class OfferController extends AbstractController
 			$file = new UploadedBase64EncodedFile(new Base64EncodedFile($photo->getFile()));
 			$photo->setFile($file);
 			$photo->setOffer($offer);
-			$photo->setLink($this->params->get('uploads_base_url').'/'.$file->getClientOriginalName());
+			$photo->setLink($file->getClientOriginalName());
 		}
-
+		$violations = $this->validator->validate($offer, null, ['new-photo']);
+		$message = '';
+		foreach ($violations as $violation) {
+			$message .= $violation->getPropertyPath().': '.$violation->getMessage().' ';
+		}
+		if (count($violations) !== 0)
+			throw new HttpException(406, $message);
 		return True;
 	}
 
@@ -68,7 +74,7 @@ class OfferController extends AbstractController
 		if ($user instanceOf Picker)
 		{
 			$offer = new SaleOffer();
-			return $form->validate($request, $offer, SaleOffer::class, array($this, 'setOwner'));
+			return $form->validate($request, $offer, SaleOffer::class, array($this, 'setOwner'), ['new-offer'], ['new-offer']);
 		}
 
 		return $this->json([
@@ -88,7 +94,7 @@ class OfferController extends AbstractController
 		if ($user instanceOf Reseller)
 		{
 			$offer = new PurchaseOffer();
-			return $form->validate($request, $offer, PurchaseOffer::class, array($this, 'setOwner'));
+			return $form->validate($request, $offer, PurchaseOffer::class, array($this, 'setOwner'), ['new-offer'], ['new-offer']);
 		}
 
 		return $this->json([
@@ -108,7 +114,7 @@ class OfferController extends AbstractController
 		if ($user instanceOf Buyer)
 		{
 			$offer = new BulkPurchaseOffer();
-			return $form->validate($request, $offer, BulkPurchaseOffer::class, array($this, 'setOwner'));
+			return $form->validate($request, $offer, BulkPurchaseOffer::class, array($this, 'setOwner'), ['new-offer'], ['new-offer']);
 		}
 
 		return $this->json([
@@ -128,7 +134,7 @@ class OfferController extends AbstractController
 		if ($user instanceOf Reseller)
 		{
 			$offer = new AuctionBid();
-			return $form->validate($request, $offer, AuctionBid::class, array($this, 'setOwner'));
+			return $form->validate($request, $offer, AuctionBid::class, array($this, 'setOwner'), ['new-offer'], ['new-offer']);
 		}
 
 		return $this->json([
@@ -157,7 +163,7 @@ class OfferController extends AbstractController
 	public function listOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(Offer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -170,7 +176,7 @@ class OfferController extends AbstractController
 	public function listSaleOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(SaleOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -183,7 +189,7 @@ class OfferController extends AbstractController
 	public function listPurchaseOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(PurchaseOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -196,7 +202,7 @@ class OfferController extends AbstractController
 	public function listBulkPurchaseOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(BulkPurchaseOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -209,7 +215,7 @@ class OfferController extends AbstractController
 	public function listAuctionOffersAction()
 	{
 		$offers = $this->getDoctrine()->getRepository(AuctionBid::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('offer')));
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 

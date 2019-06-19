@@ -22,15 +22,15 @@ abstract class User implements UserInterface
 	 * @ORM\Id()
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
-	 * @Assert\IsNull
+	 * @Assert\IsNull(groups={"new-user"})
 	 * @Serializer\ReadOnly
 	 */
 	protected $id;
 
 	/**
 	 * @ORM\Column(type="string", length=180, unique=true)
-	 * @Assert\NotBlank
-	 * @Assert\Email
+	 * @Assert\NotBlank(groups={"new-user"})
+	 * @Assert\Email(groups={"new-user"})
 	 */
 	protected $email;
 
@@ -42,49 +42,49 @@ abstract class User implements UserInterface
 	/**
 	 * @var string The hashed password
 	 * @ORM\Column(type="string")
-	 * @Assert\NotBlank
-	 * @Assert\Length(min=6, max=4096)
-	 * @Assert\NotCompromisedPassword
+	 * @Assert\NotBlank(groups={"new-user"})
+	 * @Assert\Length(min=6, max=4096, groups={"new-user"})
+	 * @Assert\NotCompromisedPassword(groups={"new-user"})
 	 */
 	protected $password;
 
 	/**
 	 * @ORM\Column(type="string", length=255)
-	 * @Assert\NotBlank
+	 * @Assert\NotBlank(groups={"new-user"})
 	 * @Serializer\SerializedName("firstName")
 	 */
 	protected $firstName;
 
 	/**
 	 * @ORM\Column(type="string", length=255)
-	 * @Assert\NotBlank
+	 * @Assert\NotBlank(groups={"new-user"})
 	 * @Serializer\SerializedName("lastName")
-	 * @Serializer\Groups("offer")
+	 * @Serializer\Groups({"Default", "list-offers"})
 	 */
 	protected $lastName;
 
 	/**
 	 * @ORM\Column(type="string", length=50)
-	 * @Assert\NotBlank
+	 * @Assert\NotBlank(groups={"new-user"})
 	 */
 	protected $city;
 
 	/**
 	 * @ORM\Column(type="text")
-	 * @Assert\NotBlank
+	 * @Assert\NotBlank(groups={"new-user"})
 	 */
 	protected $address;
 
 	/**
 	 * @ORM\Column(type="string", length=50)
-	 * @Assert\NotBlank
-	 * @Assert\Country
+	 * @Assert\NotBlank(groups={"new-user"})
+	 * @Assert\Country(groups={"new-user"})
 	 */
 	protected $country;
 
 	/**
 	 * @ORM\Column(type="string", length=20)
-	 * @Assert\NotBlank
+	 * @Assert\NotBlank(groups={"new-user"})
 	 */
 	protected $phone;
 

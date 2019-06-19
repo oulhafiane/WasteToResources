@@ -15,7 +15,7 @@ class PurchaseOffer extends Offer
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Reseller", inversedBy="purchaseOffers")
      * @ORM\JoinColumn(nullable=false)
-	 * @Groups("offer")
+	 * @Groups("list-offers")
      */
     private $owner;
 

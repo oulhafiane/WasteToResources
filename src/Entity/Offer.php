@@ -21,36 +21,37 @@ abstract class Offer
 	 * @ORM\Id()
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
-	 * @Serializer\Groups({"offer"})
-	 * @Assert\IsNull
 	 * @Serializer\ReadOnly
+	 * @Serializer\Groups({"list-offers"})
+	 * @Assert\IsNull(groups={"new-offer"})
 	 */
 	protected $id;
 
 	/**
 	 * @ORM\Column(type="string", length=25)
-	 * @Assert\NotBlank
+	 * @Assert\NotBlank(groups={"new-offer"})
 	 * @Assert\Length(
 	 *	min = 5,
-	 *	max = 20
+	 *	max = 20,
+	 *	groups={"new-offer"}
 	 * )
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 */
 	protected $title;
 
 	/**
 	 * @ORM\Column(type="text")
-	 * @Assert\NotBlank
-	 * @Serializer\Groups({"offer"})
+	 * @Assert\NotBlank(groups={"new-offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 */
 	protected $description;
 
 	/**
 	 * @ORM\Column(type="integer")
-	 * @Assert\NotBlank
-	 * @Assert\Positive
+	 * @Assert\NotBlank(groups={"new-offer"})
+	 * @Assert\Positive(groups={"new-offer"})
 	 * @Serializer\Type("integer")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 */
 	protected $price;
 
@@ -58,49 +59,50 @@ abstract class Offer
 	 * @ORM\Column(type="boolean")
 	 * @Serializer\Type("bool")
 	 * @Serializer\SerializedName("withTransport")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 */
 	protected $withTransport;
 
 	/**
 	 * @ORM\Column(type="datetime")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"list-offers"})
 	 */
 	protected $startDate;
 
 	/**
 	 * @ORM\Column(type="datetime")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"list-offers"})
 	 */
 	protected $endDate;
 
 	/**
 	 * @ORM\Column(type="bigint")
-	 * @Assert\NotBlank
-	 * @Assert\Positive
+	 * @Assert\NotBlank(groups={"new-offer"})
+	 * @Assert\Positive(groups={"new-offer"})
 	 * @Serializer\Type("integer")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 */
 	protected $weight;
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
 	 * @Serializer\Type("array")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 */
 	protected $locations = [];
 
 	/**
 	 * @ORM\Column(type="array", nullable=true)
 	 * @Serializer\Type("array")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 */
 	protected $keywords = [];
 
 	/**
 	 * @ORM\OneToMany(targetEntity="App\Entity\Photo", mappedBy="offer", cascade={"persist"})
 	 * @Serializer\Type("ArrayCollection<App\Entity\Photo>")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
+	 * @Assert\Valid(groups={"new-photo"})
 	 */
 	protected $photos;
 
@@ -108,7 +110,7 @@ abstract class Offer
 	 * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="offers")
 	 * @ORM\JoinColumn(nullable=false)
 	 * @Serializer\Type("App\Entity\Category")
-	 * @Serializer\Groups({"offer"})
+	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 */
 	protected $category;
 

@@ -6,9 +6,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use JMS\Serializer\SerializerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\DeserializationContext;
 
 class FormHandler
 {
@@ -30,18 +31,18 @@ class FormHandler
 			throw new HttpException(406, 'Field \'id\' not acceptable.');
 	}
 
-	public function validate(Request $request, $object, $class, $callBack)
+	public function validate(Request $request, $object, $class, $callBack, $validation_groups, $serializer_groups)
 	{
 		$code = 401;
 		$message = "Unauthorized";
 		$extras = NULL;
 
 		try {
-			$object = $this->serializer->deserialize($request->getContent(), $class, 'json');
+			$object = $this->serializer->deserialize($request->getContent(), $class, 'json', DeserializationContext::create()->setGroups($serializer_groups));
 
 			if (!is_null($object)) {
 				$object->__construct();
-				$violations = $this->validator->validate($object);
+				$violations = $this->validator->validate($object, null, $validation_groups);
 
 				if (count($violations) !== 0) {
 					foreach ($violations as $violation) {
@@ -65,7 +66,7 @@ class FormHandler
 		}catch (\LogicException $ex) {
 			$extras['type'] = 'This value should not be blank.';
 		}catch (\Exception $ex) {
-			$code = 400;
+			$code = $ex->getStatusCode();
 			$message = $ex->getMessage();
 		}
 

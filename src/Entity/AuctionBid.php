@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\AuctionBidRepository")
@@ -15,7 +16,7 @@ class AuctionBid extends Offer
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Reseller", inversedBy="auctionBids")
      * @ORM\JoinColumn(nullable=false)
-	 * @Serializer\Groups("offer")
+	 * @Serializer\Groups("list-offers")
      */
     private $owner;
 
@@ -27,7 +28,8 @@ class AuctionBid extends Offer
     /**
      * @ORM\Column(type="bigint", nullable=true)
 	 * @Serializer\Type("integer")
-	 * @Serializer\Groups("offer")
+	 * @Serializer\Groups({"new-offer", "list-offers"})
+	 * @Assert\Positive(groups={"new-offer"})
      */
     private $end_price;
 
