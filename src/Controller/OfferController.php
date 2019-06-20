@@ -26,6 +26,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 
 class OfferController extends AbstractController
 {
@@ -33,13 +34,15 @@ class OfferController extends AbstractController
 	private $validator;
 	private $cr;
 	private $params;
+	private $imagineCacheManager;
 
-	public function __construct(SerializerInterface $serializer, ValidatorInterface $validator, CurrentUser $cr, ParameterBagInterface $params)
+	public function __construct(SerializerInterface $serializer, ValidatorInterface $validator, CurrentUser $cr, ParameterBagInterface $params, CacheManager $cacheManager)
 	{
 		$this->serializer = $serializer;
 		$this->validator = $validator;
 		$this->cr = $cr;
 		$this->params = $params;
+		$this->imagineCacheManager = $cacheManager;
 	}
 
 	public function setOwner($offer)
@@ -53,6 +56,8 @@ class OfferController extends AbstractController
 			$photo->setFile($file);
 			$photo->setOffer($offer);
 			$photo->setLink($file->getClientOriginalName());
+			$this->imagineCacheManager->getBrowserPath($photo->getLink(), 'photo_thumb');
+			$this->imagineCacheManager->getBrowserPath($photo->getLink(), 'photo_scale_down');
 		}
 		$violations = $this->validator->validate($offer, null, ['new-photo']);
 		$message = '';
@@ -150,7 +155,7 @@ class OfferController extends AbstractController
 	public function listCategoriesAction()
 	{
 		$categories = $this->getDoctrine()->getRepository(Category::class)->findAll();
-		$data = $this->serializer->serialize($categories, 'json');
+		$data = $this->serializer->serialize($categories, 'json', SerializationContext::create()->setGroups(array('list-offers')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
