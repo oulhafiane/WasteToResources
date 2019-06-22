@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\BulkPurchaseRepository")
  */
 class BulkPurchase
@@ -29,7 +30,7 @@ class BulkPurchase
     /**
      * @ORM\Column(type="boolean")
      */
-    private $status;
+    private $accepted;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\BulkPurchaseOffer", inversedBy="bulkPurchases")
@@ -43,7 +44,10 @@ class BulkPurchase
      */
     private $seller;
 
-	public function __construct()
+	/**
+	 * @ORM\PrePersist
+	 */
+	public function onPrePersist()
 	{
 		$this->date = new \DateTime();
 	}
@@ -82,14 +86,14 @@ class BulkPurchase
         return $this;
     }
 
-    public function getStatus(): ?bool
+    public function isAccepted(): ?bool
     {
-        return $this->status;
+        return $this->accepted;
     }
 
-    public function setStatus(bool $status): self
+    public function setAccepted(bool $status): self
     {
-        $this->status = $status;
+        $this->accepted = $status;
 
         return $this;
     }

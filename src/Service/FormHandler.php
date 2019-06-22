@@ -31,7 +31,7 @@ class FormHandler
 			throw new HttpException(406, 'Field \'id\' not acceptable.');
 	}
 
-	public function validate(Request $request, $object, $class, $callBack, $validation_groups, $serializer_groups)
+	public function validate(Request $request, $class, $callBack, $validation_groups, $serializer_groups)
 	{
 		$code = 401;
 		$message = "Unauthorized";
@@ -41,7 +41,6 @@ class FormHandler
 			$object = $this->serializer->deserialize($request->getContent(), $class, 'json', DeserializationContext::create()->setGroups($serializer_groups));
 
 			if (!is_null($object)) {
-				$object->__construct();
 				$violations = $this->validator->validate($object, null, $validation_groups);
 
 				if (count($violations) !== 0) {

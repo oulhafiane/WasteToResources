@@ -12,15 +12,18 @@ security:
                 property: email
     firewalls:
         public:
-            pattern:    ^/api/public/
+            pattern:    ^/api/
+            methods: [GET]
             stateless:  true
             anonymous: true
         register:
             pattern:    ^/api/register$
+            methods: [POST]
             stateless:  true
             anonymous: true
         login:
             pattern:    ^/api/auth$
+            methods: [POST]
             stateless:  true
             anonymous: true
             provider: user
@@ -47,10 +50,6 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/api/public/, roles: IS_AUTHENTICATED_ANONYMOUSLY}
-         - { path: ^/api/register$, roles: IS_AUTHENTICATED_ANONYMOUSLY}
-         - { path: ^/api/offer/sale$, roles: ROLE_PICKER, methods: [POST] }
-         - { path: ^/api/offer/purchase$, roles: ROLE_RESELLER, methods: [POST] }
-         - { path: ^/api/offer/bulk_purchase$, roles: ROLE_BUYER, methods: [POST] }
-         - { path: ^/api/offer/auction$, roles: ROLE_RESELLER, methods: [POST] }
+         - { path: ^/api/register$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+         - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET] }
          - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

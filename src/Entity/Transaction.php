@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Ramsey\Uuid\Uuid;
 
 /**
+ * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\TransactionRepository")
  */
 class Transaction
@@ -17,17 +19,22 @@ class Transaction
 	private $id;
 
 	/**
-	 * @ORM\Column(type="boolean")
+	 * @ORM\Column(type="boolean", nullable=true)
 	 */
-	private $status;
+	private $completed;
+
+	/**
+	 * @ORM\Column(type="boolean", nullable=true)
+	 */
+	private $canceled;
 
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	private $starDate;
+	private $startDate;
 
 	/**
-	 * @ORM\Column(type="datetime")
+	 * @ORM\Column(type="datetime", nullable=true)
 	 */
 	private $endDate;
 
@@ -56,23 +63,49 @@ class Transaction
 
 	/**
 	 * @ORM\Column(type="uuid", unique=true)
-	 * @ORM\GeneratedValue(strategy="CUSTOM")
-	 * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
 	 */
 	private $sellerKey;
 
 	/**
 	 * @ORM\Column(type="uuid", unique=true)
-	 * @ORM\GeneratedValue(strategy="CUSTOM")
-	 * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
 	 */
 	private $buyerKey;
 
-	public function __construct()
+	/**
+	 * @ORM\PrePersist
+	 */
+	public function onPrePersist()
 	{
-		$this->setStatus(0);
 		$this->startDate = new \DateTime();
-		$this->endDate = 0;
+		$this->endDate = null;
+		$this->setSellerKey(Uuid::uuid4()->toString());
+		$this->setBuyerKey(Uuid::uuid4()->toString());
+	}
+
+	public function endTransaction(): self
+	{
+		//Remember to verify keys
+		if ($this->completed === False && $this->canceld === False)
+		{
+			$this->endDate = new \DateTime();
+			$this->completed = True;
+			$this->canceled = False;
+		}
+
+		return $this;
+	}
+
+	public function cancelTransaction(): self
+	{
+		//Remember to verify keys
+		if ($this->completed === False && $this->canceld === False)
+		{
+			$this->endDate = new \DateTime();
+			$this->completed = False;
+			$this->canceled = True;
+		}
+
+		return $this;
 	}
 
 	public function getId(): ?int
@@ -80,9 +113,14 @@ class Transaction
 		return $this->id;
 	}
 
-	public function getStatus(): ?bool
+	public function isCompleted(): ?bool
 	{
-		return $this->status;
+		return $this->completed;
+	}
+
+	public function isCanceled(): ?bool
+	{
+		return $this->completed;
 	}
 
 	public function getStartDate(): ?\DateTimeInterface
@@ -115,18 +153,6 @@ class Transaction
 	public function setSeller(?User $seller): self
 	{
 		$this->seller = $seller;
-
-		return $this;
-	}
-
-	public function endTransaction(): self
-	{
-		//Remember to verify keys
-		if ($this->state === 0)
-		{
-			$this->endDate = new \DateTime();
-			$this->state = 1;
-		}
 
 		return $this;
 	}

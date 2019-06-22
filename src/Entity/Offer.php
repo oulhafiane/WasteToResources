@@ -9,11 +9,12 @@ use Symfony\Component\Validator\Constraints AS Assert;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
+ * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\OfferRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({"sale" = "SaleOffer", "purchase" = "PurchaseOffer", "BulkPurchaseOffer" = "BulkPurchaseOffer", "auction" = "AuctionBid"})
- * @Serializer\Discriminator(field = "type", disabled = false, map = {"sale" = "App\Entity\SaleOffer", "purchase": "App\Entity\PurchaseOffer", "BulkPurchaseOffer": "App\Entity\BulkPurchaseOffer", "auction": "App\Entity\AuctionBid"}, groups = {"offer"})
+ * @Serializer\Discriminator(field = "type", disabled = false, map = {"sale" = "App\Entity\SaleOffer", "purchase": "App\Entity\PurchaseOffer", "BulkPurchaseOffer": "App\Entity\BulkPurchaseOffer", "auction": "App\Entity\AuctionBid"}, groups = {"new-offer"})
  */
 abstract class Offer
 {
@@ -114,15 +115,29 @@ abstract class Offer
 	 */
 	protected $category;
 
-	public function __construct()
+	/**
+	 * @ORM\Column(type="boolean")
+	 */
+	private $isActive;
+
+	/**
+	 * @ORM\OneToOne(targetEntity="App\Entity\OnHold", mappedBy="offer", cascade={"persist", "remove"})
+	 */
+	private $onHold;
+
+	/**
+	 * @ORM\PrePersist
+	 */
+	public function onPrePersist()
 	{
 		$date = new \DateTime();
 		$this->startDate = $date;
+		$this->setIsActive(True);
 		if ($this instanceOf AuctionBid)
 			$this->endDate = new \DateTime(date("Y-m-d h:i:s", strtotime("+7 day")));
 		else
 			$this->endDate = new \DateTime(date("Y-m-d h:i:s", strtotime("+30 day")));
-	//	$this->photos = new ArrayCollection();
+		//	$this->photos = new ArrayCollection();
 	}
 
 	public function getId(): ?int
@@ -263,6 +278,36 @@ abstract class Offer
 	public function setCategory(?Category $category): self
 	{
 		$this->category = $category;
+
+		return $this;
+	}
+
+	public function getIsActive(): ?bool
+	{
+		return $this->isActive;
+	}
+
+	public function setIsActive(bool $isActive): self
+	{
+		$this->isActive = $isActive;
+
+		return $this;
+	}
+
+	public function getOnHold(): ?OnHold
+	{
+		return $this->onHold;
+	}
+
+	public function setOnHold(?OnHold $onHold): self
+	{
+		$this->onHold = $onHold;
+
+		// set (or unset) the owning side of the relation if necessary
+		$newOffer = $onHold === null ? null : $this;
+		if ($newOffer !== $onHold->getOffer()) {
+			$onHold->setOffer($newOffer);
+		}
 
 		return $this;
 	}

@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
+ * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
@@ -145,6 +146,19 @@ abstract class User implements UserInterface
 
 	public function __construct()
 	{
+		$this->inbox = new ArrayCollection();
+		$this->sent = new ArrayCollection();
+		$this->feedbacks = new ArrayCollection();
+		$this->feedbacksSent = new ArrayCollection();
+		$this->purchasesTransactions = new ArrayCollection();
+		$this->salesTransactions = new ArrayCollection();
+	}
+
+	/**
+	 * @ORM\PrePersist
+	 */
+	public function onPrePersist()
+	{
 		if ($this instanceOf Picker)
 			$this->roles[] = 'ROLE_PICKER';
 		else if ($this instanceOf Reseller)
@@ -154,13 +168,7 @@ abstract class User implements UserInterface
 		$this->subscriptionDate = new \DateTime();
 		$this->setBalance(0);
 		$this->setLoyaltyPoints(0);
-		$this->setIsActive(1);
-		$this->inbox = new ArrayCollection();
-		$this->sent = new ArrayCollection();
-		$this->feedbacks = new ArrayCollection();
-		$this->feedbacksSent = new ArrayCollection();
-		$this->purchasesTransactions = new ArrayCollection();
-		$this->salesTransactions = new ArrayCollection();
+		$this->setIsActive(True);
 	}
 
 	public function getId(): ?int

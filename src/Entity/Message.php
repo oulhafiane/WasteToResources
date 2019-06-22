@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\MessageRepository")
  */
 class Message
@@ -43,7 +44,10 @@ class Message
      */
     private $sender;
 
-	public function __construct()
+	/**
+	 * @ORM\PrePersist
+	 */
+	public function onPrePersist()
 	{
 		$this->date = new \DateTime();
 		$this->setSeen(0);
