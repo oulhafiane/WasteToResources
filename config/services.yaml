@@ -30,10 +30,13 @@ services:
     jms_serializer.object_constructor:
         alias: jms_serializer.doctrine_object_constructor
         public: false
-    App\EventListener\ExceptionListener:
-        tags:
-            - { name: kernel.event_listener, event: kernel.exception }
+#    App\EventListener\ExceptionListener:
+#        tags:
+#            - { name: kernel.event_listener, event: kernel.exception }
     App\EventListener\PhotoSerializerListener:
+        tags:
+            - { name: jms_serializer.event_subscriber }
+    App\EventListener\UserSerializerListener:
         tags:
             - { name: jms_serializer.event_subscriber }
     Aws\S3\S3Client:

@@ -64,8 +64,11 @@ class FormHandler
 			$extras['email'] = 'This value is already used.';
 		}catch (\LogicException $ex) {
 			$extras['type'] = 'This value should not be blank.';
-		}catch (\Exception $ex) {
+		}catch (HttpException $ex) {
 			$code = $ex->getStatusCode();
+			$message = $ex->getMessage();
+		}catch (\Exception $ex) {
+			$code = 500;
 			$message = $ex->getMessage();
 		}
 

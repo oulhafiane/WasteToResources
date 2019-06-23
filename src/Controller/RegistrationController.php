@@ -31,7 +31,7 @@ class RegistrationController extends AbstractController
 		$user->setPassword(
 			$this->encoder->encodePassword(
 				$user,
-				$user->getPassword()
+				$user->getPlainPassword()
 			)
 		);
 
@@ -45,6 +45,6 @@ class RegistrationController extends AbstractController
 	{
 		$this->form->checkId($request);
 
-		return $this->form->validate($request, User::class, array($this, 'setPassword'), ['new-user'], ['Default']);
+		return $this->form->validate($request, User::class, array($this, 'setPassword'), ['new-user'], ['new-user']);
 	}
 }

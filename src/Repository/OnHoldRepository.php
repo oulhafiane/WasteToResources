@@ -19,22 +19,20 @@ class OnHoldRepository extends ServiceEntityRepository
         parent::__construct($registry, OnHold::class);
     }
 
-    // /**
-    //  * @return OnHold[] Returns an array of OnHold objects
-    //  */
-    /*
-    public function findByExampleField($value)
+//    /**
+//     * @return OnHold[] Returns an array of OnHold objects
+//     */
+/*    public function getOnHolds($id_user)
     {
-        return $this->createQueryBuilder('o')
-            ->andWhere('o.exampleField = :val')
-            ->setParameter('val', $value)
+        return $this->createQueryBuilder('u')
+            ->andWhere('o.owner_id = :val')
+            ->setParameter('val', $id_user)
             ->orderBy('o.id', 'ASC')
-            ->setMaxResults(10)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+*/ 
 
     /*
     public function findOneBySomeField($value): ?OnHold

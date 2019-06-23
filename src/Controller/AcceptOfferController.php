@@ -60,6 +60,7 @@ class AcceptOfferController extends AbstractController
 		$onHold = new OnHold();
 		$onHold->setOffer($offer);
 		$onHold->setFees($fees);
+		$onHold->setUser($user);
 
 
 		$offer->setBuyer($user);
@@ -74,6 +75,9 @@ class AcceptOfferController extends AbstractController
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Unauthorized.');
 		}
+
+		$extras['transaction_id'] = $transaction->getId();
+		return $extras;
 	}
 
 	private function acceptOffer($offer)
@@ -82,7 +86,7 @@ class AcceptOfferController extends AbstractController
 		if ($offer instanceof SaleOffer)
 		{
 			$this->denyAccessUnlessGranted('ROLE_RESELLER');
-			$this->handleSaleOffer($offer, $user);
+			return $this->handleSaleOffer($offer, $user);
 		}
 		else if ($offer instanceof PurchaseOffer)
 		{
@@ -101,12 +105,12 @@ class AcceptOfferController extends AbstractController
 	}
 
 	/**
-	 * @Route("/api/offers/{id}", name="accept_offer", methods={"PATCH"}, requirements={"id"="\d+"})
+	 * @Route("/api/offers/{id}/accept", name="accept_offer", methods={"PATCH"}, requirements={"id"="\d+"})
 	 */
 	public function acceptSale($id)
 	{
 		$code = 200;
-		$message = 'Very good';
+		$message = 'Offer accepted successfully.';
 		$extras = null;
 
 		$offer = $this->em->getRepository(Offer::class)->find($id);

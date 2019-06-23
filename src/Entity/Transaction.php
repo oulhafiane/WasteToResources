@@ -56,7 +56,7 @@ class Transaction
 	private $total;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\Offer", inversedBy="transactions")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Offer")
 	 * @ORM\JoinColumn(nullable=false)
 	 */
 	private $offer;

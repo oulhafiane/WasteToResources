@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20190622194551 extends AbstractMigration
+final class Version20190623192434 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -30,7 +30,9 @@ final class Version20190622194551 extends AbstractMigration
         $this->addSql('CREATE TABLE feedback (id INT AUTO_INCREMENT NOT NULL, receiver_id INT NOT NULL, sender_id INT NOT NULL, text LONGTEXT NOT NULL, date DATETIME NOT NULL, rate INT DEFAULT NULL, INDEX IDX_D2294458CD53EDB6 (receiver_id), INDEX IDX_D2294458F624B39D (sender_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE gain (id INT AUTO_INCREMENT NOT NULL, gain_from_id INT NOT NULL, date DATETIME NOT NULL, total BIGINT NOT NULL, UNIQUE INDEX UNIQ_D0952D0066B29883 (gain_from_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE message (id INT AUTO_INCREMENT NOT NULL, receiver_id INT NOT NULL, sender_id INT NOT NULL, text LONGTEXT NOT NULL, date DATETIME NOT NULL, seen TINYINT(1) NOT NULL, INDEX IDX_B6BD307FCD53EDB6 (receiver_id), INDEX IDX_B6BD307FF624B39D (sender_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE on_hold (id INT AUTO_INCREMENT NOT NULL, offer_id INT DEFAULT NULL, bid_id INT DEFAULT NULL, paid TINYINT(1) DEFAULT NULL, refunded TINYINT(1) DEFAULT NULL, date DATETIME NOT NULL, UNIQUE INDEX UNIQ_56A1075953C674EE (offer_id), UNIQUE INDEX UNIQ_56A107594D9866B8 (bid_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE notification (id INT AUTO_INCREMENT NOT NULL, user_id INT NOT NULL, message VARCHAR(255) NOT NULL, type SMALLINT NOT NULL, date DATETIME NOT NULL, seen TINYINT(1) NOT NULL, INDEX IDX_BF5476CAA76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE on_hold (id INT AUTO_INCREMENT NOT NULL, offer_id INT DEFAULT NULL, bid_id INT DEFAULT NULL, user_id INT NOT NULL, paid TINYINT(1) NOT NULL, refunded TINYINT(1) NOT NULL, date DATETIME NOT NULL, fees DOUBLE PRECISION NOT NULL, UNIQUE INDEX UNIQ_56A1075953C674EE (offer_id), UNIQUE INDEX UNIQ_56A107594D9866B8 (bid_id), INDEX IDX_56A10759A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE parameter (id INT AUTO_INCREMENT NOT NULL, param VARCHAR(255) NOT NULL, value DOUBLE PRECISION NOT NULL, UNIQUE INDEX UNIQ_2A979110A4FA7C89 (param), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE photo (id INT AUTO_INCREMENT NOT NULL, offer_id INT DEFAULT NULL, name VARCHAR(255) NOT NULL, size INT NOT NULL, link VARCHAR(255) NOT NULL, upload_at DATETIME DEFAULT NULL, INDEX IDX_14B7841853C674EE (offer_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE purchase (id INT AUTO_INCREMENT NOT NULL, offer_id INT NOT NULL, seller_id INT NOT NULL, weight BIGINT NOT NULL, date DATETIME NOT NULL, accepted TINYINT(1) NOT NULL, INDEX IDX_6117D13B53C674EE (offer_id), INDEX IDX_6117D13B8DE820D9 (seller_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE transaction (id INT AUTO_INCREMENT NOT NULL, buyer_id INT NOT NULL, seller_id INT NOT NULL, offer_id INT NOT NULL, completed TINYINT(1) DEFAULT NULL, canceled TINYINT(1) DEFAULT NULL, start_date DATETIME NOT NULL, end_date DATETIME DEFAULT NULL, total BIGINT NOT NULL, seller_key CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\', buyer_key CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\', UNIQUE INDEX UNIQ_723705D11EC6416A (seller_key), UNIQUE INDEX UNIQ_723705D13448F789 (buyer_key), INDEX IDX_723705D16C755722 (buyer_id), INDEX IDX_723705D18DE820D9 (seller_id), INDEX IDX_723705D153C674EE (offer_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
@@ -47,8 +49,10 @@ final class Version20190622194551 extends AbstractMigration
         $this->addSql('ALTER TABLE gain ADD CONSTRAINT FK_D0952D0066B29883 FOREIGN KEY (gain_from_id) REFERENCES on_hold (id)');
         $this->addSql('ALTER TABLE message ADD CONSTRAINT FK_B6BD307FCD53EDB6 FOREIGN KEY (receiver_id) REFERENCES user (id)');
         $this->addSql('ALTER TABLE message ADD CONSTRAINT FK_B6BD307FF624B39D FOREIGN KEY (sender_id) REFERENCES user (id)');
+        $this->addSql('ALTER TABLE notification ADD CONSTRAINT FK_BF5476CAA76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
         $this->addSql('ALTER TABLE on_hold ADD CONSTRAINT FK_56A1075953C674EE FOREIGN KEY (offer_id) REFERENCES offer (id)');
         $this->addSql('ALTER TABLE on_hold ADD CONSTRAINT FK_56A107594D9866B8 FOREIGN KEY (bid_id) REFERENCES bid (id)');
+        $this->addSql('ALTER TABLE on_hold ADD CONSTRAINT FK_56A10759A76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
         $this->addSql('ALTER TABLE photo ADD CONSTRAINT FK_14B7841853C674EE FOREIGN KEY (offer_id) REFERENCES offer (id)');
         $this->addSql('ALTER TABLE purchase ADD CONSTRAINT FK_6117D13B53C674EE FOREIGN KEY (offer_id) REFERENCES offer (id)');
         $this->addSql('ALTER TABLE purchase ADD CONSTRAINT FK_6117D13B8DE820D9 FOREIGN KEY (seller_id) REFERENCES user (id)');
@@ -77,6 +81,8 @@ final class Version20190622194551 extends AbstractMigration
         $this->addSql('ALTER TABLE feedback DROP FOREIGN KEY FK_D2294458F624B39D');
         $this->addSql('ALTER TABLE message DROP FOREIGN KEY FK_B6BD307FCD53EDB6');
         $this->addSql('ALTER TABLE message DROP FOREIGN KEY FK_B6BD307FF624B39D');
+        $this->addSql('ALTER TABLE notification DROP FOREIGN KEY FK_BF5476CAA76ED395');
+        $this->addSql('ALTER TABLE on_hold DROP FOREIGN KEY FK_56A10759A76ED395');
         $this->addSql('ALTER TABLE purchase DROP FOREIGN KEY FK_6117D13B8DE820D9');
         $this->addSql('ALTER TABLE transaction DROP FOREIGN KEY FK_723705D16C755722');
         $this->addSql('ALTER TABLE transaction DROP FOREIGN KEY FK_723705D18DE820D9');
@@ -91,7 +97,9 @@ final class Version20190622194551 extends AbstractMigration
         $this->addSql('DROP TABLE feedback');
         $this->addSql('DROP TABLE gain');
         $this->addSql('DROP TABLE message');
+        $this->addSql('DROP TABLE notification');
         $this->addSql('DROP TABLE on_hold');
+        $this->addSql('DROP TABLE parameter');
         $this->addSql('DROP TABLE photo');
         $this->addSql('DROP TABLE purchase');
         $this->addSql('DROP TABLE transaction');

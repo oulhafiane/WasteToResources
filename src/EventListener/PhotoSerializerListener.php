@@ -23,8 +23,8 @@ class PhotoSerializerListener implements EventSubscriberInterface
 				'method' => 'onPostSerialize',
 				'class' => 'App\Entity\Photo', // if no class, subscribe to every serialization
 				'format' => 'json', // optional format
-				'priority' => 0, // optional priority
-			),
+				'priority' => 0 // optional priority
+			)
 		);
 	}
 
@@ -34,7 +34,7 @@ class PhotoSerializerListener implements EventSubscriberInterface
 		$newLink = $this->imagineCacheManager->getBrowserPath($link, 'photo_scale_down');
 		$thumbnail = $this->imagineCacheManager->getBrowserPath($link, 'photo_thumb');
 		$visitor = $event->getVisitor();
-		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Photo', 'link', null), $newLink);
+		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Photo', 'original', null), $newLink);
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Photo', 'thumbnail', null), $thumbnail);
 	}
 }
