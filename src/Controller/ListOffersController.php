@@ -10,6 +10,7 @@ use App\Entity\BulkPurchaseOffer;
 use App\Entity\AuctionBid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -56,8 +57,9 @@ class ListOffersController extends AbstractController
 	/**
 	 * @Route("/api/offers/{id}", name="specific_offer", methods={"GET"}, requirements={"id"="\d+"})
 	 */
-	public function SpecificOfferAction($id)
+	public function SpecificOfferAction($id, Request $request)
 	{
+		var_dump($request->query->get('page'));
 		$offer = $this->em->getRepository(Offer::class)->find($id);
 		if (null === $offer)
 			throw new HttpException(404, "Offer not found.");

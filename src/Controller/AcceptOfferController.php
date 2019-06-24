@@ -80,6 +80,11 @@ class AcceptOfferController extends AbstractController
 		return $extras;
 	}
 
+	private function handlePurchaseOffer($offer, $user)
+	{
+		
+	}
+
 	private function acceptOffer($offer)
 	{
 		$user = $this->cr->getCurrentUser($this);
@@ -91,6 +96,7 @@ class AcceptOfferController extends AbstractController
 		else if ($offer instanceof PurchaseOffer)
 		{
 			$this->denyAccessUnlessGranted('ROLE_PICKER');
+			return $this->handlePurchaseOffer($offer, $user);
 		}
 		else if ($offer instanceof BulkPurchaseOffer)
 		{
