@@ -9,7 +9,6 @@
         "doctrine/annotations": "^1.6",
         "doctrine/collections": "^1.6",
         "jms/serializer-bundle": "^3.3",
-        "knplabs/knp-paginator-bundle": "^3.0",
         "league/flysystem-aws-s3-v3": "^1.0",
         "lexik/jwt-authentication-bundle": "^2.6",
         "liip/imagine-bundle": "^2.1",
@@ -27,7 +26,8 @@
         "symfony/security-bundle": "4.3.*",
         "symfony/validator": "4.3.*",
         "symfony/yaml": "4.3.*",
-        "vich/uploader-bundle": "^1.9"
+        "vich/uploader-bundle": "^1.9",
+        "white-october/pagerfanta-bundle": "^1.2"
     },
     "config": {
         "preferred-install": {

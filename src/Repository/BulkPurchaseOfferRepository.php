@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\BulkPurchaseOffer;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -12,7 +11,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method BulkPurchaseOffer[]    findAll()
  * @method BulkPurchaseOffer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class BulkPurchaseOfferRepository extends ServiceEntityRepository
+class BulkPurchaseOfferRepository extends AbstractRepository
 {
     public function __construct(RegistryInterface $registry)
     {

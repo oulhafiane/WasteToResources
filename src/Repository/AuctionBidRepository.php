@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\AuctionBid;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -12,7 +11,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method AuctionBid[]    findAll()
  * @method AuctionBid[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class AuctionBidRepository extends ServiceEntityRepository
+class AuctionBidRepository extends AbstractRepository
 {
     public function __construct(RegistryInterface $registry)
     {

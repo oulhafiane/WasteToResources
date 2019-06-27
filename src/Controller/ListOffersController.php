@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Entity\Offer;
 use App\Entity\SaleOffer;
-use App\Entity\PurcahseOffer;
+use App\Entity\PurchaseOffer;
 use App\Entity\BulkPurchaseOffer;
 use App\Entity\AuctionBid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,6 +28,23 @@ class ListOffersController extends AbstractController
 		$this->em = $em;
 	}
 
+	private function listOffers($class, $request)
+	{
+		$page = $request->query->get('page', 1);
+		$limit = $request->query->get('limit', 10);
+		$category = $request->query->get('category', null);
+		$results = $this->em->getRepository($class)->findOffer($page, $limit, $category)->getCurrentPageResults();
+		$offers = array();
+		foreach ($results as $result) {
+			$offers[] = $result;
+		}
+		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
+		$response = new Response($data);
+		$response->headers->set('Content-Type', 'application/json');
+
+		return $response;
+	}
+
 	/**
 	 * @Route("/api/categories", name="list_categories", methods={"GET"})
 	 */
@@ -42,24 +59,10 @@ class ListOffersController extends AbstractController
 	}
 
 	/**
-	 * @Route("/api/offers", name="list_offers", methods={"GET"})
-	 */
-	public function listOffersAction()
-	{
-		$offers = $this->em->getRepository(Offer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
-		$response = new Response($data);
-		$response->headers->set('Content-Type', 'application/json');
-
-		return $response;
-	}
-
-	/**
 	 * @Route("/api/offers/{id}", name="specific_offer", methods={"GET"}, requirements={"id"="\d+"})
 	 */
-	public function SpecificOfferAction($id, Request $request)
+	public function SpecificOfferAction($id)
 	{
-		var_dump($request->query->get('page'));
 		$offer = $this->em->getRepository(Offer::class)->find($id);
 		if (null === $offer)
 			throw new HttpException(404, "Offer not found.");
@@ -71,54 +74,42 @@ class ListOffersController extends AbstractController
 	}
 
 	/**
+	 * @Route("/api/offers", name="list_offers", methods={"GET"})
+	 */
+	public function listOffersAction(Request $request)
+	{
+		return $this->listOffers(Offer::class, $request);
+	}
+
+	/**
 	 * @Route("/api/offers/sale", name="list_sale_offers", methods={"GET"})
 	 */
-	public function listSaleOffersAction()
+	public function listSaleOffersAction(Request $request)
 	{
-		$offers = $this->em->getRepository(SaleOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
-		$response = new Response($data);
-		$response->headers->set('Content-Type', 'application/json');
-
-		return $response;
+		return $this->listOffers(SaleOffer::class, $request);
 	}
 
 	/**
 	 * @Route("/api/offers/purchase", name="list_purchase_offers", methods={"GET"})
 	 */
-	public function listPurchaseOffersAction()
+	public function listPurchaseOffersAction(Request $request)
 	{
-		$offers = $this->em->getRepository(PurchaseOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
-		$response = new Response($data);
-		$response->headers->set('Content-Type', 'application/json');
-
-		return $response;
+		return $this->listOffers(PurchaseOffer::class, $request);
 	}
 
 	/**
 	 * @Route("/api/offers/bulk_purchase", name="list_bulk_purchase_offers", methods={"GET"})
 	 */
-	public function listBulkPurchaseOffersAction()
+	public function listBulkPurchaseOffersAction(Request $request)
 	{
-		$offers = $this->em->getRepository(BulkPurchaseOffer::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
-		$response = new Response($data);
-		$response->headers->set('Content-Type', 'application/json');
-
-		return $response;
+		return $this->listOffers(BulkPurchaseOffer::class, $request);
 	}
 
 	/**
 	 * @Route("/api/offers/auction", name="list_auction_offers", methods={"GET"})
 	 */
-	public function listAuctionOffersAction()
+	public function listAuctionOffersAction(Request $request)
 	{
-		$offers = $this->em->getRepository(AuctionBid::class)->findAll();
-		$data = $this->serializer->serialize($offers, 'json', SerializationContext::create()->setGroups(array('list-offers')));
-		$response = new Response($data);
-		$response->headers->set('Content-Type', 'application/json');
-
-		return $response;
+		return $this->listOffers(AuctionBid::class, $request);
 	}
 }

@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Offer;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -12,7 +11,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Offer[]    findAll()
  * @method Offer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class OfferRepository extends ServiceEntityRepository
+class OfferRepository extends AbstractRepository
 {
     public function __construct(RegistryInterface $registry)
     {

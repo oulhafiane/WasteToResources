@@ -34,7 +34,7 @@ class NewOfferController extends AbstractController
 		$offer->setOwner($this->cr->getCurrentUser($this));
 		$photos = $offer->getPhotos();
 		if (null === $photos)
-			return ;
+			return True;
 		foreach($photos as $photo) {
 			$file = new UploadedBase64EncodedFile(new Base64EncodedFile($photo->getFile()));
 			$photo->setFile($file);
@@ -62,21 +62,21 @@ class NewOfferController extends AbstractController
 		{
 			switch ($data['type'])
 			{
-				case 'sale':
-					$this->denyAccessUnlessGranted('ROLE_PICKER');
-					return ;
-				case 'purchase':
-					$this->denyAccessUnlessGranted('ROLE_RESELLER');
-					return ;
-				case 'bulk_purchase':
-					$this->denyAccessUnlessGranted('ROLE_BUYER');
-					return ;
-				case 'auction':
-					$this->denyAccessUnlessGranted('ROLE_RESELLER');
-					return ;
-				default:
-					throw $this->createAccessDeniedException();
-					break;
+			case 'sale':
+				$this->denyAccessUnlessGranted('ROLE_PICKER');
+				return ;
+			case 'purchase':
+				$this->denyAccessUnlessGranted('ROLE_RESELLER');
+				return ;
+			case 'bulk_purchase':
+				$this->denyAccessUnlessGranted('ROLE_BUYER');
+				return ;
+			case 'auction':
+				$this->denyAccessUnlessGranted('ROLE_RESELLER');
+				return ;
+			default:
+				throw $this->createAccessDeniedException();
+				break;
 			}
 		}
 		throw $this->createAccessDeniedException();
