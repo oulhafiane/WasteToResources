@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\HasLifeCycleCallBacks
@@ -14,26 +15,31 @@ class Notification
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Serializer\Groups({"infos"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Serializer\Groups({"infos"})
      */
     private $message;
 
     /**
      * @ORM\Column(type="smallint")
+     * @Serializer\Groups({"infos"})
      */
     private $type;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Serializer\Groups({"infos"})
      */
     private $date;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Serializer\Groups({"infos"})
      */
     private $seen;
 
@@ -43,14 +49,20 @@ class Notification
      */
     private $user;
 
+    /**
+     * @ORM\Column(type="bigint", nullable=true)
+     * @Serializer\Groups({"infos"})
+     */
+    private $reference;
+
 	/**
 	 * @ORM\PrePersist
 	 */
 	public function onPrePersist()
-         	{
-         		$this->date = new \DateTime();
-         		$this->seen = false;
-         	}
+                  	{
+                  		$this->date = new \DateTime();
+                  		$this->seen = false;
+                  	}
 
     public function getId(): ?int
     {
@@ -106,6 +118,18 @@ class Notification
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getReference(): ?int
+    {
+        return $this->reference;
+    }
+
+    public function setReference(?int $reference): self
+    {
+        $this->reference = $reference;
 
         return $this;
     }

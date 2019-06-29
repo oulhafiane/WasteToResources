@@ -164,6 +164,7 @@ abstract class User implements UserInterface
 
 	/**
 	 * @ORM\OneToMany(targetEntity="App\Entity\Notification", mappedBy="user")
+	 * @Serializer\Groups({"infos"})
 	 */
 	private $notifications;
 

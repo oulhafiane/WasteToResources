@@ -22,7 +22,7 @@ class AuctionBid extends Offer
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Bid", mappedBy="offer")
-     * @Serializer\Groups({"new-offer", "list-offers"})
+     * @Serializer\Groups({"new-offer", "specific-offer"})
      */
     private $bids;
 

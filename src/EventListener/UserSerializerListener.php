@@ -39,7 +39,7 @@ class UserSerializerListener implements EventSubscriberInterface
 	{
 		try {
 			$groups = $event->getContext()->getAttribute('groups');
-		}catch (\RunTimeException $ex) {
+		}catch (\Exception $ex) {
 			$groups = [];
 		}
 		if (!in_array('infos', $groups))
@@ -49,7 +49,8 @@ class UserSerializerListener implements EventSubscriberInterface
 		$onholds = $user->getOnHolds();
 		$total = 0;
 		foreach ($onholds as $onhold) {
-			$total += $onhold->getFees();
+			if ($onhold->isPaid() === false && $onhold->isRefunded() === false)
+				$total += $onhold->getFees();
 		}
 		$visitor = $event->getVisitor();
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\User', 'onhold', null), $total);

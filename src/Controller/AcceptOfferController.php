@@ -12,6 +12,7 @@ use App\Entity\Bid;
 use App\Entity\Transaction;
 use App\Entity\OnHold;
 use App\Entity\Parameter;
+use App\Entity\Notification;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -82,16 +83,24 @@ class AcceptOfferController extends AbstractController
 		return $extras;
 	}
 
-	private function refundUser($onhold)
+	private function refundUser($bid)
 	{
+		$onhold = $bid->getOnHold();
+		$onhold->setRefunded();
+
 		$user = $onhold->getUser();
 		$user->setBalance($user->getBalance() + $onhold->getFees());
 
-		$onhold->setRefunded();
+		$notification = new Notification();
+		$notification->setUser($user);
+		$notification->setType(0);
+		$notification->setReference($bid->getOffer()->getId());
+		$notification->setMessage("Your bid on : ".$bid->getOffer()->getTitle()." has been canceled.");
 
 		try {
 			$this->em->persist($user);
 			$this->em->persist($onhold);
+			$this->em->persist($notification);
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
@@ -124,7 +133,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'bid_price not correct, it must be greater than : '.(int)$total);
 
 		if (null !== $last_bid)
-			$this->refundUser($last_bid->getOnhold());
+			$this->refundUser($last_bid);
 		$user->setBalance($user->getBalance() - $fees);
 
 		$bid = new Bid();

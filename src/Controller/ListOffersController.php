@@ -66,7 +66,7 @@ class ListOffersController extends AbstractController
 		$offer = $this->em->getRepository(Offer::class)->find($id);
 		if (null === $offer)
 			throw new HttpException(404, "Offer not found.");
-		$data = $this->serializer->serialize($offer, 'json', SerializationContext::create()->setGroups(array('list-offers')));
+		$data = $this->serializer->serialize($offer, 'json', SerializationContext::create()->setGroups(array('list-offers', 'specific-offer')));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
