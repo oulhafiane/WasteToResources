@@ -19,11 +19,12 @@ class ParametersFixtures extends Fixture
 			'feesBulkPurchaseOfferStatic' => 800,
 			'feesAuctionBidStatic' => 800,
 			'feesBidStatic' => 500,
-			'feesSaleOfferDynamic' => 2.0,
-			'feesPurchaseOfferDynamic' => 2.0,
-			'feesBulkPurchaseOfferDynamic' => 3.5,
-			'feesAuctionBidDynamoic' => 3.5,
-			'feesBidDynamic' => 2.5,
+			'feesSaleOfferDynamic' => 0.02,
+			'feesPurchaseOfferDynamic' => 0.02,
+			'feesBulkPurchaseOfferDynamic' => 0.035,
+			'feesAuctionBidDynamoic' => 0.035,
+			'feesBidDynamic' => 0.025,
+			'percentageNextBid' => 0.01
 		);
 
 		foreach($params as $key=>$value) {

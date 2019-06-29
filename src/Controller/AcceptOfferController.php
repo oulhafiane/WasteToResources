@@ -8,12 +8,14 @@ use App\Entity\SaleOffer;
 use App\Entity\PurchaseOffer;
 use App\Entity\BulkPurchaseOffer;
 use App\Entity\AuctionBid;
+use App\Entity\Bid;
 use App\Entity\Transaction;
 use App\Entity\OnHold;
 use App\Entity\Parameter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AcceptOfferController extends AbstractController
@@ -27,16 +29,16 @@ class AcceptOfferController extends AbstractController
 		$this->cr = $cr;
 	}
 
-	private function getSaleOfferFees($total)
+	private function getSaleOfferFees($total, $offerStaticParam, $offerDynamicParam)
 	{
 		$fees = null;
 		$isStatic = $this->em->getRepository(Parameter::class)->get('feesStatic')->getValue();
-		if ($isStatic === 1.0)
-			$fees = $this->em->getRepository(Parameter::class)->get('feesSaleOfferStatic')->getValue();
-		else if ($isStatic === 0.0)
-			$fees = $this->em->getRepository(Parameter::class)->get('feesSaleOfferDynamic')->getValue();
-		if ($fees !== null && is_numeric($fees)) {
-			if ($isStatic === 0.0)
+		if (1.0 === $isStatic)
+			$fees = $this->em->getRepository(Parameter::class)->get($offerStaticParam)->getValue();
+		else if (0.0 === $isStatic)
+			$fees = $this->em->getRepository(Parameter::class)->get($offerDynamicParam)->getValue();
+		if (null !== $fees && is_numeric($fees)) {
+			if (0.0 === $isStatic)
 				return ($total * $fees);
 			return $fees;
 		}
@@ -46,7 +48,7 @@ class AcceptOfferController extends AbstractController
 	private function handleSaleOffer($offer, $user)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
-		$fees = $this->getSaleOfferFees($total);
+		$fees = $this->getSaleOfferFees($total, 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
 		if ($user->getBalance() < ($total + $fees))
 			throw new HttpException(406, 'Insufficient balance.');
 		$user->setBalance($user->getBalance() - ($total + $fees));
@@ -73,11 +75,26 @@ class AcceptOfferController extends AbstractController
 			$this->em->persist($user);
 			$this->em->flush();
 		}catch (\Exception $ex) {
-			throw new HttpException(406, 'Unauthorized.');
+			throw new HttpException(406, 'Not Acceptable.');
 		}
 
 		$extras['transaction_id'] = $transaction->getId();
 		return $extras;
+	}
+
+	private function refundUser($onhold)
+	{
+		$user = $onhold->getUser();
+		$user->setBalance($user->getBalance() + $onhold->getFees());
+
+		$onhold->setRefunded();
+
+		try {
+			$this->em->persist($user);
+			$this->em->persist($onhold);
+		}catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
 	}
 
 	private function handlePurchaseOffer($offer, $user)
@@ -85,7 +102,55 @@ class AcceptOfferController extends AbstractController
 		
 	}
 
-	private function acceptOffer($offer)
+	private function handleBulkPurchaseOffer($offer, $user)
+	{
+
+	}
+
+	private function handleAuctionBid($offer, $user, $request)
+	{
+		$total = $offer->getPrice() * $offer->getWeight();
+		$fees = $this->getSaleOfferFees($total, 'feesAuctionBidStatic', 'feesAuctionBidDynamic');
+		if ($user->getBalance() < $fees)
+			throw new HttpException(406, 'Insufficient balance, you must pay fees of Bid : '.$fees);
+		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer], ['price' => 'DESC']);
+		$data = json_decode($request->getContent(), true);
+		if (!array_key_exists('bid_price', $data))
+			throw new HttpException(406, 'bid_price not found.');
+		$bid_price = $data['bid_price'];
+		$percentage = $this->em->getRepository(Parameter::class)->get('percentageNextBid')->getValue();
+		$total = (null === $last_bid) ? $total + ($total * $percentage) : $last_bid->getPrice() + ($last_bid->getPrice() * $percentage);
+		if (!is_numeric($bid_price) || $bid_price <= $total)
+			throw new HttpException(406, 'bid_price not correct, it must be greater than : '.(int)$total);
+
+		if (null !== $last_bid)
+			$this->refundUser($last_bid->getOnhold());
+		$user->setBalance($user->getBalance() - $fees);
+
+		$bid = new Bid();
+		$bid->setOffer($offer);
+		$bid->setBidder($user);
+		$bid->setPrice($bid_price);
+
+		$onHold = new OnHold();
+		$onHold->setBid($bid);
+		$onHold->setFees($fees);
+		$onHold->setUser($user);
+
+		try {
+			$this->em->persist($bid);
+			$this->em->persist($onHold);
+			$this->em->persist($user);
+			$this->em->flush();
+		}catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+
+		$extras['bid_id'] = $bid->getId();
+		return $extras;
+	}
+
+	private function acceptOffer($offer, $request)
 	{
 		$user = $this->cr->getCurrentUser($this);
 		if ($offer instanceof SaleOffer)
@@ -101,10 +166,12 @@ class AcceptOfferController extends AbstractController
 		else if ($offer instanceof BulkPurchaseOffer)
 		{
 			$this->denyAccessUnlessGranted('ROLE_RESELLER');
+			return $this->handleBulkPurchaseOffer($offer, $user);
 		}
 		else if ($offer instanceof AuctionBid)
 		{
 			$this->denyAccessUnlessGranted('ROLE_BUYER');
+			return $this->handleAuctionBid($offer, $user, $request);
 		}
 		else
 			throw $this->createAccessDeniedException();
@@ -113,7 +180,7 @@ class AcceptOfferController extends AbstractController
 	/**
 	 * @Route("/api/offers/{id}/accept", name="accept_offer", methods={"PATCH"}, requirements={"id"="\d+"})
 	 */
-	public function acceptSale($id)
+	public function acceptSale($id, Request $request)
 	{
 		$code = 200;
 		$message = 'Offer accepted successfully.';
@@ -123,7 +190,7 @@ class AcceptOfferController extends AbstractController
 		if (null === $offer)
 			throw new HttpException(404, 'Offer not found.');
 		if ($offer->getEndDate() > new \DateTime() && $offer->getIsActive() === True)
-			$extras = $this->acceptOffer($offer);
+			$extras = $this->acceptOffer($offer, $request);
 		else
 		{
 			$code = 406;

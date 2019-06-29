@@ -117,6 +117,7 @@ abstract class Offer
 
 	/**
 	 * @ORM\Column(type="boolean")
+	 * @Serializer\Groups({"list-offers"})
 	 */
 	private $isActive;
 

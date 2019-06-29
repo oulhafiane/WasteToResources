@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\HasLifecycleCallbacks
@@ -19,6 +20,7 @@ class Bid
 
 	/**
 	 * @ORM\Column(type="bigint")
+	 * @Serializer\Groups({"list-offers"})
 	 */
 	private $price;
 
@@ -36,12 +38,12 @@ class Bid
 	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\Buyer", inversedBy="bids")
 	 * @ORM\JoinColumn(nullable=false)
+	 * @Serializer\Groups({"list-offers"})
 	 */
 	private $bidder;
 
 	/**
 	 * @ORM\OneToOne(targetEntity="App\Entity\OnHold", mappedBy="bid", cascade={"persist", "remove"})
-	 * @ORM\JoinColumn(nullable=false)
 	 */
 	private $onHold;
 
