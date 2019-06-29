@@ -83,7 +83,7 @@ class AcceptOfferController extends AbstractController
 		return $extras;
 	}
 
-	private function refundUser($bid)
+	private function refundUser($bid, $owner)
 	{
 		$onhold = $bid->getOnHold();
 		$onhold->setRefunded();
@@ -95,7 +95,10 @@ class AcceptOfferController extends AbstractController
 		$notification->setUser($user);
 		$notification->setType(0);
 		$notification->setReference($bid->getOffer()->getId());
-		$notification->setMessage("Your bid on : ".$bid->getOffer()->getTitle()." has been canceled.");
+		if ($owner->getId() === $user->getId())
+			$notification->setMessage("Your bid on : ".$bid->getOffer()->getTitle()." has been updated.");
+		else
+			$notification->setMessage("Your bid on : ".$bid->getOffer()->getTitle()." has been canceled.");
 
 		try {
 			$this->em->persist($user);
@@ -133,7 +136,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'bid_price not correct, it must be greater than : '.(int)$total);
 
 		if (null !== $last_bid)
-			$this->refundUser($last_bid);
+			$this->refundUser($last_bid, $user);
 		$user->setBalance($user->getBalance() - $fees);
 
 		$bid = new Bid();
