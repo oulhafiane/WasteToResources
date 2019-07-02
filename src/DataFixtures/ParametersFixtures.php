@@ -18,12 +18,11 @@ class ParametersFixtures extends Fixture
 			'feesPurchaseOfferStatic' => 400,
 			'feesBulkPurchaseOfferStatic' => 800,
 			'feesAuctionBidStatic' => 800,
-			'feesBidStatic' => 500,
 			'feesSaleOfferDynamic' => 0.02,
 			'feesPurchaseOfferDynamic' => 0.02,
 			'feesBulkPurchaseOfferDynamic' => 0.035,
 			'feesAuctionBidDynamoic' => 0.035,
-			'feesBidDynamic' => 0.025,
+			'feesBid' => 500,
 			'percentageNextBid' => 0.01
 		);
 

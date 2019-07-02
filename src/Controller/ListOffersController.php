@@ -31,7 +31,7 @@ class ListOffersController extends AbstractController
 	private function listOffers($class, $request)
 	{
 		$page = $request->query->get('page', 1);
-		$limit = $request->query->get('limit', 10);
+		$limit = $request->query->get('limit', 12);
 		$category = $request->query->get('category', null);
 		$results = $this->em->getRepository($class)->findOffer($page, $limit, $category)->getCurrentPageResults();
 		$offers = array();

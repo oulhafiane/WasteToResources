@@ -13,10 +13,17 @@ class OnHold
 {
 	/**
 	 * @ORM\Id()
-	 * @ORM\GeneratedValue()
-	 * @ORM\Column(type="integer")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Offer", inversedBy="onHolds")
+	 * @ORM\JoinColumn(nullable=false)
 	 */
-	private $id;
+	private $offer;
+
+	/**
+	 * @ORM\Id()
+	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="onHolds")
+	 * @ORM\JoinColumn(nullable=false)
+	 */
+	private $user;
 
 	/**
 	 * @ORM\Column(type="boolean")
@@ -34,162 +41,127 @@ class OnHold
 	private $date;
 
 	/**
-	 * @ORM\OneToOne(targetEntity="App\Entity\Offer", inversedBy="onHold", cascade={"persist", "remove"})
-	 */
-	private $offer;
-
-	/**
-	 * @ORM\OneToOne(targetEntity="App\Entity\Bid", inversedBy="onHold", cascade={"persist", "remove"})
-	 */
-	private $bid;
-
-	/**
-	 * @ORM\OneToOne(targetEntity="App\Entity\Gain", mappedBy="gainFrom", cascade={"persist", "remove"})
-	 */
-	private $gain;
-
-	/**
 	 * @ORM\Column(type="float")
 	 */
 	private $fees;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="onHolds")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $user;
-
 	/**
-	 * @ORM\PrePersist
-	 * @ORM\PreUpdate
+	 * @ORM\OneToOne(targetEntity="App\Entity\Gain", mappedBy="fromOnHold", cascade={"persist", "remove"})
 	 */
-	public function checkAssociations()
-         	{
-         		if ($this->offer !== null && $this->bid !== null)
-         			throw new HttpException(406, 'Could not create this transaction.');
-         	}
+	private $gain;
 
 	/**
 	 * @ORM\PrePersist
 	 */
 	public function onPrePersist()
-         	{
-         		$this->setDate(new \DateTime());
-         		$this->paid = false;
-         		$this->refunded = false;
-         	}
-
-	public function getId(): ?int
-         	{
-         		return $this->id;
-         	}
+	{
+		$this->setDate(new \DateTime());
+		$this->paid = false;
+		$this->refunded = false;
+	}
 
 	public function isPaid(): ?bool
-         	{
-         		return $this->paid;
-         	}
+	{
+		return $this->paid;
+	}
 
 	public function setPaid(): self
-         	{
-         		if ($this->paid === False && $this->refunded === False)
-         		{
-         			$this->paid = True;
-         			$this->refunded = False;
-         		}
-         
-         		return $this;
-         	}
+	{
+		if ($this->paid === False && $this->refunded === False)
+		{
+			$this->paid = True;
+			$this->refunded = False;
+		}
+
+		return $this;
+	}
 
 	public function isRefunded(): ?bool
-         	{
-         		return $this->refunded;
-         	}
+	{
+		return $this->refunded;
+	}
 
 	public function setRefunded(): self
-         	{
-         		if ($this->paid === False && $this->refunded === False)
-         		{
-         			$this->paid = False;
-         			$this->refunded = True;
-         		}
-         
-         		return $this;
-         	}
+	{
+		if ($this->paid === False && $this->refunded === False)
+		{
+			$this->paid = False;
+			$this->refunded = True;
+		}
 
-	public function getDate(): ?\DateTimeInterface
-         	{
-         		return $this->date;
-         	}
+		return $this;
+	}
 
-	public function setDate(\DateTimeInterface $date): self
-         	{
-         		$this->date = $date;
-         
-         		return $this;
-         	}
+	public function init(): self
+	{
+		$this->paid = false;
+		$this->refunded = false;
+
+		return $this;
+	}
 
 	public function getOffer(): ?Offer
-         	{
-         		return $this->offer;
-         	}
+	{
+		return $this->offer;
+	}
 
 	public function setOffer(?Offer $offer): self
-         	{
-         		$this->offer = $offer;
-         
-         		return $this;
-         	}
+	{
+		$this->offer = $offer;
 
-	public function getBid(): ?Bid
-         	{
-         		return $this->bid;
-         	}
+		return $this;
+	}
 
-	public function setBid(?Bid $bid): self
-         	{
-         		$this->bid = $bid;
-         
-         		return $this;
-         	}
+	public function getUser(): ?User
+	{
+		return $this->user;
+	}
 
-	public function getGain(): ?Gain
-         	{
-         		return $this->gain;
-         	}
+	public function setUser(?User $user): self
+	{
+		$this->user = $user;
 
-	public function setGain(Gain $gain): self
-         	{
-         		$this->gain = $gain;
-         
-         		// set the owning side of the relation if necessary
-         		if ($this !== $gain->getGainFrom()) {
-         			$gain->setGainFrom($this);
-         		}
-         
-         		return $this;
-         	}
+		return $this;
+	}
+
+	public function getDate(): ?\DateTimeInterface
+	{
+		return $this->date;
+	}
+
+	public function setDate(\DateTimeInterface $date): self
+	{
+		$this->date = $date;
+
+		return $this;
+	}
 
 	public function getFees(): ?float
-         	{
-         		return $this->fees;
-         	}
+	{
+		return $this->fees;
+	}
 
 	public function setFees(float $fees): self
-         	{
-         		$this->fees = $fees;
-         
-         		return $this;
-         	}
+	{
+		$this->fees = $fees;
 
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
+		return $this;
+	}
 
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
+	public function getGain(): ?Gain
+	{
+		return $this->gain;
+	}
 
-        return $this;
-    }
+	public function setGain(Gain $gain): self
+	{
+		$this->gain = $gain;
+
+		// set the owning side of the relation if necessary
+		if ($this !== $gain->getFromOnHold()) {
+			$gain->setFromOnHold($this);
+		}
+
+		return $this;
+	}
 }

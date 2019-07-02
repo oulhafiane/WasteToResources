@@ -21,11 +21,14 @@ class Bid
 	/**
 	 * @ORM\Column(type="bigint")
 	 * @Serializer\Groups({"list-offers"})
+     * @Serializer\Exclude(if="object.getIsActive() === false")
 	 */
 	private $price;
 
 	/**
 	 * @ORM\Column(type="datetime")
+	 * @Serializer\Groups({"list-offers"})
+     * @Serializer\Exclude(if="object.getIsActive() === false")
 	 */
 	private $date;
 
@@ -39,13 +42,14 @@ class Bid
 	 * @ORM\ManyToOne(targetEntity="App\Entity\Buyer", inversedBy="bids")
 	 * @ORM\JoinColumn(nullable=false)
 	 * @Serializer\Groups({"list-offers"})
+     * @Serializer\Exclude(if="object.getIsActive() === false")
 	 */
 	private $bidder;
 
 	/**
-	 * @ORM\OneToOne(targetEntity="App\Entity\OnHold", mappedBy="bid", cascade={"persist", "remove"})
+	 * @ORM\Column(type="boolean")
 	 */
-	private $onHold;
+	private $isActive;
 
 	/**
 	 * @ORM\PrePersist
@@ -53,6 +57,7 @@ class Bid
 	public function onPrePersist()
 	{
 		$this->date = new \DateTime();
+		$this->isActive = true;
 	}
 
 	public function getId(): ?int
@@ -101,20 +106,14 @@ class Bid
 		return $this;
 	}
 
-	public function getOnHold(): ?OnHold
+	public function getIsActive(): ?bool
 	{
-		return $this->onHold;
+		return $this->isActive;
 	}
 
-	public function setOnHold(?OnHold $onHold): self
+	public function setIsActive(bool $isActive): self
 	{
-		$this->onHold = $onHold;
-
-		// set (or unset) the owning side of the relation if necessary
-		$newBid = $onHold === null ? null : $this;
-		if ($newBid !== $onHold->getBid()) {
-			$onHold->setBid($newBid);
-		}
+		$this->isActive = $isActive;
 
 		return $this;
 	}

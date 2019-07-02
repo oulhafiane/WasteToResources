@@ -122,9 +122,14 @@ abstract class Offer
 	private $isActive;
 
 	/**
-	 * @ORM\OneToOne(targetEntity="App\Entity\OnHold", mappedBy="offer", cascade={"persist", "remove"})
+	 * @ORM\OneToMany(targetEntity="App\Entity\OnHold", mappedBy="offer")
 	 */
-	private $onHold;
+	private $onHolds;
+
+	public function __construct()
+	{
+		$this->onHolds = new ArrayCollection();
+	}
 
 	/**
 	 * @ORM\PrePersist
@@ -295,19 +300,32 @@ abstract class Offer
 		return $this;
 	}
 
-	public function getOnHold(): ?OnHold
+	/**
+	 * @return Collection|OnHold[]
+	 */
+	public function getOnHolds(): Collection
 	{
-		return $this->onHold;
+		return $this->onHolds;
 	}
 
-	public function setOnHold(?OnHold $onHold): self
+	public function addOnHold(OnHold $onHold): self
 	{
-		$this->onHold = $onHold;
+		if (!$this->onHolds->contains($onHold)) {
+			$this->onHolds[] = $onHold;
+			$onHold->setOffer($this);
+		}
 
-		// set (or unset) the owning side of the relation if necessary
-		$newOffer = $onHold === null ? null : $this;
-		if ($newOffer !== $onHold->getOffer()) {
-			$onHold->setOffer($newOffer);
+		return $this;
+	}
+
+	public function removeOnHold(OnHold $onHold): self
+	{
+		if ($this->onHolds->contains($onHold)) {
+			$this->onHolds->removeElement($onHold);
+			// set the owning side to null (unless already changed)
+			if ($onHold->getOffer() === $this) {
+				$onHold->setOffer(null);
+			}
 		}
 
 		return $this;

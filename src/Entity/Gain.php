@@ -10,28 +10,31 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Gain
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+	/**
+	 * @ORM\Id()
+	 * @ORM\GeneratedValue()
+	 * @ORM\Column(type="integer")
+	 */
+	private $id;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $date;
+	/**
+	 * @ORM\Column(type="datetime")
+	 */
+	private $date;
 
-    /**
-     * @ORM\Column(type="bigint")
-     */
-    private $total;
+	/**
+	 * @ORM\Column(type="bigint")
+	 */
+	private $total;
 
-    /**
-     * @ORM\OneToOne(targetEntity="App\Entity\OnHold", inversedBy="gain", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $gainFrom;
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\OnHold", inversedBy="gain", cascade={"persist", "remove"})
+	 * @ORM\JoinColumns({
+     *     @ORM\JoinColumn(name="offer_id", referencedColumnName="offer_id"),
+	 *     @ORM\JoinColumn(name="user_id", referencedColumnName="user_id")
+     * })
+	 */
+	private $fromOnHold;
 
 	/**
 	 * @ORM\PrePersist
@@ -41,44 +44,44 @@ class Gain
 		$this->setDate(new \DateTime());
 	}
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+	public function getId(): ?int
+	{
+		return $this->id;
+	}
 
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
+	public function getDate(): ?\DateTimeInterface
+	{
+		return $this->date;
+	}
 
-    public function setDate(\DateTimeInterface $date): self
-    {
-        $this->date = $date;
+	public function setDate(\DateTimeInterface $date): self
+	{
+		$this->date = $date;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function getTotal(): ?int
-    {
-        return $this->total;
-    }
+	public function getTotal(): ?int
+	{
+		return $this->total;
+	}
 
-    public function setTotal(int $total): self
-    {
-        $this->total = $total;
+	public function setTotal(int $total): self
+	{
+		$this->total = $total;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function getGainFrom(): ?OnHold
-    {
-        return $this->gainFrom;
-    }
+	public function getFromOnHold(): ?OnHold
+	{
+		return $this->fromOnHold;
+	}
 
-    public function setGainFrom(OnHold $gainFrom): self
-    {
-        $this->gainFrom = $gainFrom;
+	public function setFromOnHold(OnHold $fromOnHold): self
+	{
+		$this->fromOnHold = $fromOnHold;
 
-        return $this;
-    }
+		return $this;
+	}
 }

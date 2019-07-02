@@ -23,6 +23,7 @@ class AuctionBid extends Offer
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Bid", mappedBy="offer")
      * @Serializer\Groups({"new-offer", "specific-offer"})
+	 * ORM\OrderBy({"sort_order" = "ASC"})
      */
     private $bids;
 

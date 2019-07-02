@@ -11,6 +11,7 @@ use App\Entity\AuctionBid;
 use App\Entity\Bid;
 use App\Entity\Transaction;
 use App\Entity\OnHold;
+use App\Entity\Gain;
 use App\Entity\Parameter;
 use App\Entity\Notification;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,7 +31,7 @@ class AcceptOfferController extends AbstractController
 		$this->cr = $cr;
 	}
 
-	private function getSaleOfferFees($total, $offerStaticParam, $offerDynamicParam)
+	private function getOfferFees($total, $offerStaticParam, $offerDynamicParam)
 	{
 		$fees = null;
 		$isStatic = $this->em->getRepository(Parameter::class)->get('feesStatic')->getValue();
@@ -46,10 +47,73 @@ class AcceptOfferController extends AbstractController
 		throw new HttpException(500, 'Cannot get fees details.');
 	}
 
+	private function refundUser($onhold, $currentUser)
+	{
+		$offer = $onhold->getOffer();
+		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer, 'isActive' => true], ['price' => 'DESC']);
+		$fees = $this->em->getRepository(Parameter::class)->get('feesBid')->getValue();
+
+		$user = $onhold->getUser();
+		if ($last_bid->getBidder()->getId() === $user->getId()) {
+			$onhold->setPaid();
+			$gain = new Gain();
+			$gain->setTotal($onhold->getFees());
+			$gain->setFromOnHold($onhold);
+		} else {
+			$onhold->setRefunded();
+			$user->setBalance($user->getBalance() + $onhold->getFees());
+		}
+
+		$bids = $this->em->getRepository(Bid::class)->findBy([
+			'bidder' => $user,
+			'offer' => $offer,
+			'isActive' => true
+		], ['date' => 'DESC']);
+
+		try {
+			foreach ($bids as $bid) {
+				$bid->setIsActive(false);
+				$this->em->persist($bid);
+			}
+			if ($last_bid->getBidder()->getId() === $user->getId()) {
+				$this->em->persist($gain);
+				$message = "You left the auction and you lost ".$fees." MAD on";
+			} else {
+				$this->em->persist($user);
+				$message = "You left the auction and ".$fees." MAD has been returned on";
+			}
+			$this->em->persist($onhold);
+			$this->notifyUser($user, $offer, $currentUser, $message);
+		}catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+	}
+
+	private function notifyUser($user, $offer, $currentUser, $message = null)
+	{
+		$notification = new Notification();
+		$notification->setUser($user);
+		$notification->setType(0);
+		$notification->setReference($offer->getId());
+
+		if (null !== $message)
+			$notification->setMessage($message.": ".$offer->getTitle());
+		else if ($currentUser->getId() === $user->getId())
+			$notification->setMessage("Your bid on : ".$offer->getTitle()." has been updated.");
+		else
+			$notification->setMessage("Someone bid more than you at auction : ".$offer->getTitle().".");
+
+		try {
+			$this->em->persist($notification);
+		}catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+	}
+
 	private function handleSaleOffer($offer, $user)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
-		$fees = $this->getSaleOfferFees($total, 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
+		$fees = $this->getOfferFees($total, 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
 		if ($user->getBalance() < ($total + $fees))
 			throw new HttpException(406, 'Insufficient balance.');
 		$user->setBalance($user->getBalance() - ($total + $fees));
@@ -62,8 +126,8 @@ class AcceptOfferController extends AbstractController
 
 		$onHold = new OnHold();
 		$onHold->setOffer($offer);
-		$onHold->setFees($fees);
 		$onHold->setUser($user);
+		$onHold->setFees($fees);
 
 
 		$offer->setBuyer($user);
@@ -83,35 +147,9 @@ class AcceptOfferController extends AbstractController
 		return $extras;
 	}
 
-	private function refundUser($bid, $owner)
-	{
-		$onhold = $bid->getOnHold();
-		$onhold->setRefunded();
-
-		$user = $onhold->getUser();
-		$user->setBalance($user->getBalance() + $onhold->getFees());
-
-		$notification = new Notification();
-		$notification->setUser($user);
-		$notification->setType(0);
-		$notification->setReference($bid->getOffer()->getId());
-		if ($owner->getId() === $user->getId())
-			$notification->setMessage("Your bid on : ".$bid->getOffer()->getTitle()." has been updated.");
-		else
-			$notification->setMessage("Your bid on : ".$bid->getOffer()->getTitle()." has been canceled.");
-
-		try {
-			$this->em->persist($user);
-			$this->em->persist($onhold);
-			$this->em->persist($notification);
-		}catch (\Exception $ex) {
-			throw new HttpException(406, 'Not Acceptable.');
-		}
-	}
-
 	private function handlePurchaseOffer($offer, $user)
 	{
-		
+
 	}
 
 	private function handleBulkPurchaseOffer($offer, $user)
@@ -122,37 +160,57 @@ class AcceptOfferController extends AbstractController
 	private function handleAuctionBid($offer, $user, $request)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
-		$fees = $this->getSaleOfferFees($total, 'feesAuctionBidStatic', 'feesAuctionBidDynamic');
+		$fees = $this->em->getRepository(Parameter::class)->get('feesBid')->getValue();
+		if (null === $fees)
+			throw new HttpException(500, 'Cannot get fees details.');
 		if ($user->getBalance() < $fees)
 			throw new HttpException(406, 'Insufficient balance, you must pay fees of Bid : '.$fees);
-		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer], ['price' => 'DESC']);
+		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer, 'isActive' => true], ['price' => 'DESC']);
 		$data = json_decode($request->getContent(), true);
 		if (!array_key_exists('bid_price', $data))
 			throw new HttpException(406, 'bid_price not found.');
 		$bid_price = $data['bid_price'];
 		$percentage = $this->em->getRepository(Parameter::class)->get('percentageNextBid')->getValue();
 		$total = (null === $last_bid) ? $total + ($total * $percentage) : $last_bid->getPrice() + ($last_bid->getPrice() * $percentage);
-		if (!is_numeric($bid_price) || $bid_price <= $total)
-			throw new HttpException(406, 'bid_price not correct, it must be greater than : '.(int)$total);
+		if (!is_numeric($bid_price) || $bid_price < (int)$total)
+			throw new HttpException(406, 'bid_price not correct, it must be greater than or equal : '.(int)$total);
 
 		if (null !== $last_bid)
-			$this->refundUser($last_bid, $user);
-		$user->setBalance($user->getBalance() - $fees);
+			$this->notifyUser($last_bid->getBidder(), $offer, $user);
+
+		$alreadyBid = false;
+		$last_bid = $this->em->getRepository(Bid::class)->findOneBy([
+			'offer' => $offer,
+			'bidder' => $user
+		], ['date' => 'DESC']);
+		if (null !== $last_bid)
+			$alreadyBid = true;
+
+		if ($alreadyBid === false) {
+			$user->setBalance($user->getBalance() - $fees);
+
+			$onHold = new OnHold();
+			$onHold->setOffer($offer);
+			$onHold->setFees($fees);
+			$onHold->setUser($user);
+		} else {
+			$onHold = $this->em->getrepository(OnHold::class)->findOneBy([
+				'offer' => $offer,
+				'user' => $user
+			]);
+			$onHold->init();
+		}
 
 		$bid = new Bid();
 		$bid->setOffer($offer);
 		$bid->setBidder($user);
 		$bid->setPrice($bid_price);
 
-		$onHold = new OnHold();
-		$onHold->setBid($bid);
-		$onHold->setFees($fees);
-		$onHold->setUser($user);
-
 		try {
 			$this->em->persist($bid);
 			$this->em->persist($onHold);
-			$this->em->persist($user);
+			if ($alreadyBid === false)
+				$this->em->persist($user);
 			$this->em->flush();
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
@@ -190,9 +248,47 @@ class AcceptOfferController extends AbstractController
 	}
 
 	/**
+	 * @Route("/api/auction/{id}/leave", name="leave_auction", methods={"PATCH"}, requirements={"id"="\d+"})
+	 */
+	public function leaveAuctionAction($id, Request $request)
+	{
+		$this->denyAccessUnlessGranted('ROLE_BUYER');
+		$code = 200;
+		$message = 'You left the auction successfully.';
+		$extras = null;
+
+		$offer = $this->em->getRepository(AuctionBid::class)->find($id);
+		if (null === $offer)
+			throw new HttpException(404, 'Auction not found.');
+		$user = $this->cr->getCurrentUser($this);
+
+		$onhold = $this->em->getRepository(OnHold::class)->findOneBy([
+			'user' => $user,
+			'offer' => $offer,
+		]);
+
+		if (null === $onhold) {
+			$code = 406;
+			$message = "You are not an active bidder in this offer.";
+		} else {
+	//		try {
+				$this->refundUser($onhold, $user);
+				$this->em->flush();
+	//		}catch (\Exception $ex) {
+	//			throw new HttpException(406, 'Not Acceptable.');
+	//		}
+		}
+
+		return $this->json([
+			'code' => $code,
+			'message' => $message,
+		], $code);
+	}
+
+	/**
 	 * @Route("/api/offers/{id}/accept", name="accept_offer", methods={"PATCH"}, requirements={"id"="\d+"})
 	 */
-	public function acceptSale($id, Request $request)
+	public function acceptOfferAction($id, Request $request)
 	{
 		$code = 200;
 		$message = 'Offer accepted successfully.';
