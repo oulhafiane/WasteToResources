@@ -1,0 +1,20 @@
+easy_admin:
+    site_name: '<b><i>Waste To Resources Admin</i></b>'
+    design:
+        brand_color: '#1ABC9C'
+    entities:
+        - App\Entity\Picker
+        - App\Entity\Reseller
+        - App\Entity\Buyer
+        - App\Entity\SaleOffer
+        - App\Entity\PurchaseOffer
+        - App\Entity\BulkPurchaseOffer
+        - App\Entity\AuctionBid
+        - App\Entity\Bid
+        - App\Entity\Purchase
+        - App\Entity\BulkPurchase
+        - App\Entity\Transaction
+       #- App\Entity\OnHold
+        - App\Entity\Gain
+        - App\Entity\Category
+        - App\Entity\Parameter
