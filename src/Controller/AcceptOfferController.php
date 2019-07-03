@@ -6,7 +6,9 @@ use App\Service\CurrentUser;
 use App\Entity\Offer;
 use App\Entity\SaleOffer;
 use App\Entity\PurchaseOffer;
+use App\Entity\Purchase;
 use App\Entity\BulkPurchaseOffer;
+use App\Entity\BulkPurchase;
 use App\Entity\AuctionBid;
 use App\Entity\Bid;
 use App\Entity\Transaction;
@@ -83,13 +85,13 @@ class AcceptOfferController extends AbstractController
 				$message = "You left the auction and ".$fees." MAD has been returned on";
 			}
 			$this->em->persist($onhold);
-			$this->notifyUser($user, $offer, $currentUser, $message);
+			$this->notifyBidUpdatedToUser($user, $offer, $currentUser, $message);
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 	}
 
-	private function notifyUser($user, $offer, $currentUser, $message = null)
+	private function notifyBidUpdatedToUser($user, $offer, $currentUser, $message = null)
 	{
 		$notification = new Notification();
 		$notification->setUser($user);
@@ -106,6 +108,21 @@ class AcceptOfferController extends AbstractController
 		try {
 			$this->em->persist($notification);
 		}catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+	}
+
+	private function notifyPurchaseAcceptedToBuyer($buyer, $offer, $seller, $weight)
+	{
+		$notification = new Notification();
+		$notification->setUser($buyer);
+		$notification->setType(1);
+		$notification->setReference($offer->getId());
+		$notification->setMessage($seller->getFirstName()." ".$seller->getLastName()." accepted to sell you ".$weight."KG on : ".$offer->getTitle().".");
+
+		try {
+			$this->em->persist($notification);
+		} catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 	}
@@ -147,14 +164,53 @@ class AcceptOfferController extends AbstractController
 		return $extras;
 	}
 
-	private function handlePurchaseOffer($offer, $user)
+	private function handlePurchase($offer, $user, $request, $class, $extra_param)
 	{
+		$data = json_decode($request->getContent(), true);
+		if (!array_key_exists('weight', $data))
+			throw new HttpException(406, 'Weight not found.');
+		$weight = $data['weight'];
+		if ($weight > $offer->getWeight())
+			throw new HttpException(406, 'Weight must be lower than or equal to '.$offer->getWeight().'KG.');
+		$min = $offer->getMin();
+		if (null !== $min && $weight < $min)
+			throw new HttpException(406, 'Weight must be greater than or equal to '.$min.'KG.');
 
+		$havePending = $this->em->getRepository($class)->findOneBy([
+			'offer' => $offer,
+			'seller' => $user,
+			'accepted' => false
+		]);
+		if (null !== $havePending)
+			throw new HttpException(406, 'You already have a pending status in this offer');
+
+		$purchase = new $class;
+		$purchase->setWeight($weight);
+		$purchase->setPrice($offer->getPrice());
+		$purchase->setOffer($offer);
+		$purchase->setSeller($user);
+
+		$this->notifyPurchaseAcceptedToBuyer($offer->getOwner(), $offer, $user, $weight);
+
+		try {
+			$this->em->persist($purchase);
+			$this->em->flush();
+		} catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+
+		$extras[$extra_param] = $purchase->getId();
+		return $extras;
 	}
 
-	private function handleBulkPurchaseOffer($offer, $user)
+	private function handlePurchaseOffer($offer, $user, $request)
 	{
+		return $this->handlePurchase($offer, $user, $request, Purchase::class, 'purchase_id');
+	}
 
+	private function handleBulkPurchaseOffer($offer, $user, $request)
+	{
+		return $this->handlePurchase($offer, $user, $request, BulkPurchase::class, 'bulk_purchase_id');
 	}
 
 	private function handleAuctionBid($offer, $user, $request)
@@ -176,7 +232,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'bid_price not correct, it must be greater than or equal : '.(int)$total);
 
 		if (null !== $last_bid)
-			$this->notifyUser($last_bid->getBidder(), $offer, $user);
+			$this->notifyBidUpdatedToUser($last_bid->getBidder(), $offer, $user);
 
 		$alreadyBid = false;
 		$last_bid = $this->em->getRepository(Bid::class)->findOneBy([
@@ -231,12 +287,12 @@ class AcceptOfferController extends AbstractController
 		else if ($offer instanceof PurchaseOffer)
 		{
 			$this->denyAccessUnlessGranted('ROLE_PICKER');
-			return $this->handlePurchaseOffer($offer, $user);
+			return $this->handlePurchaseOffer($offer, $user, $request);
 		}
 		else if ($offer instanceof BulkPurchaseOffer)
 		{
 			$this->denyAccessUnlessGranted('ROLE_RESELLER');
-			return $this->handleBulkPurchaseOffer($offer, $user);
+			return $this->handleBulkPurchaseOffer($offer, $user, $request);
 		}
 		else if ($offer instanceof AuctionBid)
 		{
@@ -245,44 +301,6 @@ class AcceptOfferController extends AbstractController
 		}
 		else
 			throw $this->createAccessDeniedException();
-	}
-
-	/**
-	 * @Route("/api/auction/{id}/leave", name="leave_auction", methods={"PATCH"}, requirements={"id"="\d+"})
-	 */
-	public function leaveAuctionAction($id, Request $request)
-	{
-		$this->denyAccessUnlessGranted('ROLE_BUYER');
-		$code = 200;
-		$message = 'You left the auction successfully.';
-		$extras = null;
-
-		$offer = $this->em->getRepository(AuctionBid::class)->find($id);
-		if (null === $offer)
-			throw new HttpException(404, 'Auction not found.');
-		$user = $this->cr->getCurrentUser($this);
-
-		$onhold = $this->em->getRepository(OnHold::class)->findOneBy([
-			'user' => $user,
-			'offer' => $offer,
-		]);
-
-		if (null === $onhold) {
-			$code = 406;
-			$message = "You are not an active bidder in this offer.";
-		} else {
-	//		try {
-				$this->refundUser($onhold, $user);
-				$this->em->flush();
-	//		}catch (\Exception $ex) {
-	//			throw new HttpException(406, 'Not Acceptable.');
-	//		}
-		}
-
-		return $this->json([
-			'code' => $code,
-			'message' => $message,
-		], $code);
 	}
 
 	/**
@@ -309,6 +327,44 @@ class AcceptOfferController extends AbstractController
 			'code' => $code,
 			'message' => $message,
 			'extras' => $extras
+		], $code);
+	}
+
+	/**
+	 * @Route("/api/auction/{id}/leave", name="leave_auction", methods={"PATCH"}, requirements={"id"="\d+"})
+	 */
+	public function leaveAuctionAction($id, Request $request)
+	{
+		$this->denyAccessUnlessGranted('ROLE_BUYER');
+		$code = 200;
+		$message = 'You left the auction successfully.';
+		$extras = null;
+
+		$offer = $this->em->getRepository(AuctionBid::class)->find($id);
+		if (null === $offer)
+			throw new HttpException(404, 'Auction not found.');
+		$user = $this->cr->getCurrentUser($this);
+
+		$onhold = $this->em->getRepository(OnHold::class)->findOneBy([
+			'user' => $user,
+			'offer' => $offer,
+		]);
+
+		if (null === $onhold) {
+			$code = 406;
+			$message = "You are not an active bidder in this offer.";
+		} else {
+			try {
+				$this->refundUser($onhold, $user);
+				$this->em->flush();
+			}catch (\Exception $ex) {
+				throw new HttpException(406, 'Not Acceptable.');
+			}
+		}
+
+		return $this->json([
+			'code' => $code,
+			'message' => $message,
 		], $code);
 	}
 }

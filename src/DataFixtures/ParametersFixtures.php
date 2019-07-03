@@ -23,7 +23,8 @@ class ParametersFixtures extends Fixture
 			'feesBulkPurchaseOfferDynamic' => 0.035,
 			'feesAuctionBidDynamoic' => 0.035,
 			'feesBid' => 500,
-			'percentageNextBid' => 0.01
+			'percentageNextBid' => 0.01,
+			'handleAllInBulkTransactions' => 0
 		);
 
 		foreach($params as $key=>$value) {

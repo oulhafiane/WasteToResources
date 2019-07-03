@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\BulkPurchaseRepository")
  */
-class BulkPurchase
+class BulkPurchase extends MappedPurchase
 {
     /**
      * @ORM\Id()
@@ -17,84 +17,44 @@ class BulkPurchase
      */
     private $id;
 
-    /**
-     * @ORM\Column(type="bigint")
-     */
-    private $weight;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $date;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $accepted;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\BulkPurchaseOffer", inversedBy="bulkPurchases")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $offer;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Reseller", inversedBy="acceptedOffers")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $seller;
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\BulkPurchaseOffer", inversedBy="purchases")
+	 * @ORM\JoinColumn(nullable=false)
+	 */
+	private $offer;
 
 	/**
-	 * @ORM\PrePersist
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Reseller", inversedBy="acceptedOffers")
+	 * @ORM\JoinColumn(nullable=false)
 	 */
-	public function onPrePersist()
-	{
-		$this->date = new \DateTime();
-	}
+	private $seller;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getWeight(): ?int
-    {
-        return $this->weight;
-    }
+	public function getOffer(): ?BulkPurchaseOffer
+	{
+		return $this->offer;
+	}
 
-    public function setWeight(int $weight): self
-    {
-        $this->weight = $weight;
+	public function setOffer(?BulkPurchaseOffer $offer): self
+	{
+		$this->offer = $offer;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
+	public function getSeller(): ?Reseller
+	{
+		return $this->seller;
+	}
 
-    public function getOffer(): ?BulkPurchaseOffer
-    {
-        return $this->offer;
-    }
+	public function setSeller(?Reseller $seller): self
+	{
+		$this->seller = $seller;
 
-    public function setOffer(?BulkPurchaseOffer $offer): self
-    {
-        $this->offer = $offer;
-
-        return $this;
-    }
-
-    public function isAccepted(): ?bool
-    {
-        return $this->accepted;
-    }
-
-    public function setAccepted(bool $status): self
-    {
-        $this->accepted = $status;
-
-        return $this;
-    }
+		return $this;
+	}
 }

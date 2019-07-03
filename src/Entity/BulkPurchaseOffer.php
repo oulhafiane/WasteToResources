@@ -6,12 +6,21 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints AS Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\BulkPurchaseOfferRepository")
  */
 class BulkPurchaseOffer extends Offer
 {
+	/**
+	 * @ORM\Column(type="bigint")
+	 * @Groups({"new-offer", "list-offers"})
+	 * @Assert\LessThanOrEqual(propertyPath="weight", groups={"new-offer"})
+
+	 */
+	private $min;
+
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\BulkPurchase", mappedBy="offer")
      */
@@ -28,7 +37,19 @@ class BulkPurchaseOffer extends Offer
     {
         parent::__construct();
         $this->bulkPurchases = new ArrayCollection();
-    }
+	}
+	
+	public function getMin(): ?int
+	{
+		return $this->min;
+	}
+
+	public function setMin(?int $min): self
+	{
+		$this->min = $min;
+
+		return $this;
+	}
 
     /**
      * @return Collection|BulkPurchase[]
