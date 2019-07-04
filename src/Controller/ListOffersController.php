@@ -33,7 +33,7 @@ class ListOffersController extends AbstractController
 		$page = $request->query->get('page', 1);
 		$limit = $request->query->get('limit', 12);
 		$category = $request->query->get('category', null);
-		$results = $this->em->getRepository($class)->findOffer($page, $limit, $category)->getCurrentPageResults();
+		$results = $this->em->getRepository($class)->findOffers($page, $limit, $category)->getCurrentPageResults();
 		$offers = array();
 		foreach ($results as $result) {
 			$offers[] = $result;

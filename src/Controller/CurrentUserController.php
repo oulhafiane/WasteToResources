@@ -53,6 +53,25 @@ class CurrentUserController extends AbstractController
 		}
 	}
 
+	/**
+	 * @Route("/api/current/notifications", name="current_user_notifications", methods={"GET"})
+	 */
+	public function currentUserNotificationsActions(Request $request)
+	{
+		$page = $request->query->get('page', 1);
+		$limit = $request->query->get('limit', 12);
+		$results = $this->em->getRepository(Notification::class)->findNotifications($page, $limit)->getCurrentPageResults();
+		$notifications = array();
+		foreach ($results as $result) {
+			$notifications[] = $result;
+		}
+		$data = $this->serializer->serialize($notifications, 'json', SerializationContext::create()->setGroups(array('notifications')));
+		$response = new Response($data);
+		$response->headers->set('Content-Type', 'application/json');
+
+		return $response;
+	}
+
     /**
      * @Route("/api/current/infos", name="current_user_infos", methods={"GET"})
      */

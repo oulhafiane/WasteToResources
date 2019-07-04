@@ -15,31 +15,31 @@ class Notification
 	 * @ORM\Id()
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
-	 * @Serializer\Groups({"infos"})
+	 * @Serializer\Groups({"notifications"})
 	 */
 	private $id;
 
 	/**
 	 * @ORM\Column(type="string", length=255)
-	 * @Serializer\Groups({"infos"})
+	 * @Serializer\Groups({"notifications"})
 	 */
 	private $message;
 
 	/**
 	 * @ORM\Column(type="smallint")
-	 * @Serializer\Groups({"infos"})
+	 * @Serializer\Groups({"notifications"})
 	 */
 	private $type;
 
 	/**
 	 * @ORM\Column(type="datetime")
-	 * @Serializer\Groups({"infos"})
+	 * @Serializer\Groups({"notifications"})
 	 */
 	private $date;
 
 	/**
 	 * @ORM\Column(type="boolean")
-	 * @Serializer\Groups({"infos"})
+	 * @Serializer\Groups({"notifications"})
 	 */
 	private $seen;
 
@@ -51,7 +51,7 @@ class Notification
 
 	/**
 	 * @ORM\Column(type="bigint", nullable=true)
-	 * @Serializer\Groups({"infos"})
+	 * @Serializer\Groups({"notifications"})
 	 */
 	private $reference;
 

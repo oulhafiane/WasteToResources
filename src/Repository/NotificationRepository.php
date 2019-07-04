@@ -12,12 +12,22 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Notification[]    findAll()
  * @method Notification[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class NotificationRepository extends ServiceEntityRepository
+class NotificationRepository extends AbstractRepository
 {
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, Notification::class);
     }
+
+	public function findNotifications($page = 1, $limit = 12)
+	{
+		$qb = $this->createQueryBuilder('n')
+			->select('n')
+			->orderBy('n.date', 'desc')
+			;
+		
+		return $this->paginate($qb, $limit, $page);
+	}
 
     // /**
     //  * @return Notification[] Returns an array of Notification objects

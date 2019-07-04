@@ -11,7 +11,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method PurchaseOffer[]    findAll()
  * @method PurchaseOffer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PurchaseOfferRepository extends AbstractRepository
+class PurchaseOfferRepository extends AbstractOfferRepository
 {
     public function __construct(RegistryInterface $registry)
     {

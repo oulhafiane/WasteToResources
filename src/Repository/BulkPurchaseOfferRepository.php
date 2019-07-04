@@ -11,7 +11,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method BulkPurchaseOffer[]    findAll()
  * @method BulkPurchaseOffer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class BulkPurchaseOfferRepository extends AbstractRepository
+class BulkPurchaseOfferRepository extends AbstractOfferRepository
 {
     public function __construct(RegistryInterface $registry)
     {

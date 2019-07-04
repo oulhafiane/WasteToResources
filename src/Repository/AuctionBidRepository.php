@@ -11,7 +11,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method AuctionBid[]    findAll()
  * @method AuctionBid[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class AuctionBidRepository extends AbstractRepository
+class AuctionBidRepository extends AbstractOfferRepository
 {
     public function __construct(RegistryInterface $registry)
     {
