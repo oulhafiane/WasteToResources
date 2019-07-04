@@ -26,14 +26,16 @@ class CurrentUserController extends AbstractController
 	}
 
 	/**
-	 * @Route("/api/notifications/seen", name="notifications_seen", methods={"POST"})
+	 * @Route("/api/current/notifications/seen", name="notifications_seen", methods={"PATCH"})
 	 */
 	public function seenNotificationAction(Request $request)
 	{
 		$current = $this->cr->getCurrentUser($this);	
-		$data = json_decode($request->getContent(), true);
-		foreach ($data['notifications'] as $notification_id) {
-			$notification = $this->em->getRepository(Notification::class)->find($notification_id);
+		$notifications = $this->em->getRepository(Notification::class)->findBy([
+			'user' => $current,
+			'seen' => false
+		]);
+		foreach ($notifications as $notification) {
 			if ($notification->getSeen() === false) {
 				$notification->setSeen();
 				$this->em->persist($notification);
@@ -58,9 +60,10 @@ class CurrentUserController extends AbstractController
 	 */
 	public function currentUserNotificationsActions(Request $request)
 	{
+		$current = $this->cr->getCurrentUser($this);	
 		$page = $request->query->get('page', 1);
 		$limit = $request->query->get('limit', 12);
-		$results = $this->em->getRepository(Notification::class)->findNotifications($page, $limit)->getCurrentPageResults();
+		$results = $this->em->getRepository(Notification::class)->findNotifications($current, $page, $limit)->getCurrentPageResults();
 		$notifications = array();
 		foreach ($results as $result) {
 			$notifications[] = $result;

@@ -19,10 +19,11 @@ class NotificationRepository extends AbstractRepository
         parent::__construct($registry, Notification::class);
     }
 
-	public function findNotifications($page = 1, $limit = 12)
+	public function findNotifications($user, $page = 1, $limit = 12)
 	{
 		$qb = $this->createQueryBuilder('n')
-			->select('n')
+			->select('n');
+		$qb->where($qb->expr()->eq('n.user', $user->getId()))
 			->orderBy('n.date', 'desc')
 			;
 		
