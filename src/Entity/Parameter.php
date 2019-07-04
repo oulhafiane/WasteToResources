@@ -26,10 +26,12 @@ class Parameter
      */
     private $value;
 
-	public function __construct(string $key, float $value)
+	public function __construct(string $key = null, float $value = null)
 	{
-		$this->setParam($key);
-		$this->setValue($value);
+		if (null != $key)
+			$this->setParam($key);
+		if (null != $value)
+			$this->setValue($value);
 	}
 
     public function getId(): ?int
