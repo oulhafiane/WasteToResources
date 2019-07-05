@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\Helper;
 use App\Service\CurrentUser;
 use App\Entity\Offer;
 use App\Entity\SaleOffer;
@@ -20,33 +21,23 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mercure\Publisher;
+use Symfony\Component\Mercure\Update;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AcceptOfferController extends AbstractController
 {
 	private $em;
 	private $cr;
+	private $helper;
+	private $publisher;
 
-	public function __construct(EntityManagerInterface $em, CurrentUser $cr)
+	public function __construct(EntityManagerInterface $em, CurrentUser $cr, Helper $helper, Publisher $publisher)
 	{
 		$this->em = $em;
 		$this->cr = $cr;
-	}
-
-	private function getOfferFees($total, $offerStaticParam, $offerDynamicParam)
-	{
-		$fees = null;
-		$isStatic = $this->em->getRepository(Parameter::class)->get('feesStatic')->getValue();
-		if (1.0 === $isStatic)
-			$fees = $this->em->getRepository(Parameter::class)->get($offerStaticParam)->getValue();
-		else if (0.0 === $isStatic)
-			$fees = $this->em->getRepository(Parameter::class)->get($offerDynamicParam)->getValue();
-		if (null !== $fees && is_numeric($fees)) {
-			if (0.0 === $isStatic)
-				return ($total * $fees);
-			return $fees;
-		}
-		throw new HttpException(500, 'Cannot get fees details.');
+		$this->helper = $helper;
+		$this->publisher = $publisher;
 	}
 
 	private function refundUser($onhold, $currentUser)
@@ -130,7 +121,7 @@ class AcceptOfferController extends AbstractController
 	private function handleSaleOffer($offer, $user)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
-		$fees = $this->getOfferFees($total, 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
+		$fees = $this->helper->getOfferFees($total, 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
 		if ($user->getBalance() < ($total + $fees))
 			throw new HttpException(406, 'Insufficient balance.');
 		$user->setBalance($user->getBalance() - ($total + $fees));
@@ -173,7 +164,9 @@ class AcceptOfferController extends AbstractController
 		if ($weight > $offer->getWeight())
 			throw new HttpException(406, 'Weight must be lower than or equal to '.$offer->getWeight().'KG.');
 		$min = $offer->getMin();
-		if (null !== $min && $weight < $min)
+		if (null === $min)
+			$min = 1;
+		if ($weight < $min)
 			throw new HttpException(406, 'Weight must be greater than or equal to '.$min.'KG.');
 
 		$havePending = $this->em->getRepository($class)->findOneBy([
@@ -271,6 +264,19 @@ class AcceptOfferController extends AbstractController
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
+
+		try {
+			$update = new Update(
+				'waste_to_resources/offers/'.$offer->getId(),
+				json_encode([
+					'price' => $bid_price,
+					'first_name' => $user->getFirstName(),
+					'last_name' => $user->getLastName(),
+					'email' => $user->getEmail()
+				])
+			);
+			$this->publisher->__invoke($update);
+		} catch (\Exception $ex) {}
 
 		$extras['bid_id'] = $bid->getId();
 		return $extras;

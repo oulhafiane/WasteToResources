@@ -25,6 +25,7 @@
         "symfony/framework-bundle": "4.3.*",
         "symfony/http-client": "4.3.*",
         "symfony/intl": "4.3.*",
+        "symfony/mercure-bundle": "^0.1.2",
         "symfony/orm-pack": "^1.0",
         "symfony/security-bundle": "4.3.*",
         "symfony/translation": "4.3.*",

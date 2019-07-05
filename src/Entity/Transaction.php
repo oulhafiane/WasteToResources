@@ -71,6 +71,11 @@ class Transaction
 	 */
 	private $buyerKey;
 
+	public function __toString() : string
+	{
+		return $this->getId()." : ".$this->getTotal()."MAD";
+	}
+
 	/**
 	 * @ORM\PrePersist
 	 */

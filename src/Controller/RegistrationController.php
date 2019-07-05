@@ -26,7 +26,7 @@ class RegistrationController extends AbstractController
 		$this->form = $form;
 	}
 
-	public function setPassword($user)
+	public function setPassword($user, $em)
 	{
 		$user->setPassword(
 			$this->encoder->encodePassword(

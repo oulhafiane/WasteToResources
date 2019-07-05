@@ -49,7 +49,7 @@ class FormHandler
 					}
 				}
 				else {
-					$showId = $callBack($object);
+					$showId = $callBack($object, $this->entityManager);
 
 					$this->entityManager->persist($object);
 					$this->entityManager->flush();

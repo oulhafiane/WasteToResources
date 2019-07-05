@@ -55,6 +55,11 @@ class Notification
 	 */
 	private $reference;
 
+	public function __toString() : string
+	{
+		return $this->getMessage();
+	}
+
 	/**
 	 * @ORM\PrePersist
 	 */

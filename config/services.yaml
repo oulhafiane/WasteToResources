@@ -6,6 +6,8 @@
 parameters:
     uploads_base_url: 'https://%env(AWS_S3_BUCKET_NAME)%.s3.%env(AWS_S3_REGION_ID)%.amazonaws.com'
     locale: 'en'
+    env(MERCURE_PUBLISH_URL): ''
+    env(MERCURE_JWT_SECRET): ''
 
 services:
     # default configuration for services in *this* file
