@@ -126,6 +126,8 @@ abstract class Offer
 	 */
 	private $onHolds;
 
+	private $tmpEndDate;
+
 	public function __construct()
 	{
 		$this->onHolds = new ArrayCollection();
@@ -136,13 +138,10 @@ abstract class Offer
 	 */
 	public function onPrePersist()
 	{
-		$date = new \DateTime();
+		$date = new \DateTime(date("Y-m-d H:i:s"));
 		$this->startDate = $date;
+		$this->endDate = $this->tmpEndDate;
 		$this->setIsActive(True);
-		if ($this instanceOf AuctionBid)
-			$this->endDate = new \DateTime(date("Y-m-d h:i:s", strtotime("+7 day")));
-		else
-			$this->endDate = new \DateTime(date("Y-m-d h:i:s", strtotime("+30 day")));
 		//	$this->photos = new ArrayCollection();
 	}
 
@@ -327,6 +326,13 @@ abstract class Offer
 				$onHold->setOffer(null);
 			}
 		}
+
+		return $this;
+	}
+
+	public function setTmpEndDate(?\DateTimeInterface $date): self
+	{
+		$this->tmpEndDate = $date;
 
 		return $this;
 	}

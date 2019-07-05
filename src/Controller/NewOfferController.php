@@ -11,6 +11,7 @@ use App\Entity\PurchaseOffer;
 use App\Entity\BulkPurchaseOffer;
 use App\Entity\AuctionBid;
 use App\Entity\OnHold;
+use App\Entity\Parameter;
 use App\Helper\UploadedBase64EncodedFile;
 use App\Helper\Base64EncodedFile;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,13 +49,30 @@ class NewOfferController extends AbstractController
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
 		$fees = null;
+		$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'periodOffer']);
 		if ($offer instanceof PurchaseOffer) {
 			$fees = $this->helper->getOfferFees($total, 'feesPurchaseOfferStatic', 'feesPurchaseOfferDynamic');
 		} else if ($offer instanceof BulkPurchaseOffer) {
 			$fees = $this->helper->getOfferFees($total, 'feesBulkPurchaseOfferStatic', 'feesBulkPurchaseOfferDynamic');
 		} else if ($offer instanceof AuctionBid) {
-			$fees = $this->helper->getOfferFees($total, 'feesAuctionBidStatic', 'feesAuctionBidDynamic');
+			$period = $offer->getPeriod();
+			switch ($period) {
+				case 1:
+					$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'mediumPeriodAuctionBid']);
+					$fees = $this->helper->getOfferFees($total, 'feesMediumAuctionBidStatic', 'feesMediumAuctionBidDynamic');
+					break;
+				case 2:
+					$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'largePeriodAuctionBid']);
+					$fees = $this->helper->getOfferFees($total, 'feesLargeAuctionBidStatic', 'feesLargeAuctionBidDynamic');
+					break;
+				default:
+					$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'smallPeriodAuctionBid']);
+					$fees = $this->helper->getOfferFees($total, 'feesSmallAuctionBidStatic', 'feesSmallAuctionBidDynamic');
+					break;
+			}
 		}
+
+		$offer->setTmpEndDate(new \DateTime(date("Y-m-d H:i:s", strtotime("+".$realPeriod->getValue()." day"))));
 
 		if (null === $fees)
 			return;

@@ -35,6 +35,14 @@ class AuctionBid extends Offer
      */
     private $end_price;
 
+	/**
+	 * @ORM\Column(type="smallint", nullable=true)
+	 * @Serializer\Type("integer")
+	 * @Serializer\Groups({"new-offer", "list-offers"})
+	 * @Assert\Choice({0, 1, 2}, groups={"new-offer"})
+	 */
+	private $period;
+
     public function __construct()
     {
         parent::__construct();
@@ -92,6 +100,18 @@ class AuctionBid extends Offer
     public function setEndPrice(int $end_price): self
     {
         $this->end_price = $end_price;
+
+        return $this;
+    }
+
+    public function getPeriod(): ?int
+    {
+        return $this->period;
+    }
+
+    public function setPeriod(int $period): self
+    {
+        $this->period = $period;
 
         return $this;
     }
