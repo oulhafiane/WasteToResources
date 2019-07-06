@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\HasLifecycleCallbacks
@@ -19,11 +20,13 @@ class Message
 
     /**
      * @ORM\Column(type="text")
+	 * @Serializer\Groups({"messages"})
      */
     private $text;
 
     /**
      * @ORM\Column(type="datetime")
+	 * @Serializer\Groups({"messages"})
      */
     private $date;
 
@@ -41,6 +44,7 @@ class Message
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="sent")
      * @ORM\JoinColumn(nullable=false)
+	 * @Serializer\Groups({"messages"})
      */
     private $sender;
 

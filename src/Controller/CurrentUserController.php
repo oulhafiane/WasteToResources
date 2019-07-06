@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Service\CurrentUser;
 use App\Entity\Notification;
+use App\Entity\Message;
+use App\Entity\Feedback;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +25,47 @@ class CurrentUserController extends AbstractController
 		$this->cr = $cr;
 		$this->serializer = $serializer;
 		$this->em = $em;
+	}
+
+	private function getMessages($request, $class, $groups)
+	{
+		$current = $this->cr->getCurrentUser($this);	
+		$page = $request->query->get('page', 1);
+		$limit = $request->query->get('limit', 12);
+		$results = $this->em->getRepository($class)->findByUser($current, $page, $limit)->getCurrentPageResults();
+		$notifications = array();
+		foreach ($results as $result) {
+			$notifications[] = $result;
+		}
+		$data = $this->serializer->serialize($notifications, 'json', SerializationContext::create()->setGroups($groups));
+		$response = new Response($data);
+		$response->headers->set('Content-Type', 'application/json');
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/api/current/notifications", name="current_user_notifications", methods={"GET"})
+	 */
+	public function currentUserNotificationsAction(Request $request)
+	{
+		return $this->getMessages($request, Notification::class, ['notifications']);
+	}
+
+	/**
+	 * @Route("/api/current/messages", name="current_user_messages", methods={"GET"})
+	 */
+	public function currentUserMessagesAction(Request $request)
+	{
+		return $this->getMessages($request, Message::class, ['messages']);
+	}
+
+	/**
+	 * @Route("/api/current/feedbacks", name="current_user_feedbacks", methods={"GET"})
+	 */
+	public function currentUserFeedbacksAction(Request $request)
+	{
+		return $this->getMessages($request, Feedback::class, ['feedbacks']);
 	}
 
 	/**
@@ -53,26 +96,6 @@ class CurrentUserController extends AbstractController
 				'message' => 'Not Acceptable.'
 			], 200);
 		}
-	}
-
-	/**
-	 * @Route("/api/current/notifications", name="current_user_notifications", methods={"GET"})
-	 */
-	public function currentUserNotificationsActions(Request $request)
-	{
-		$current = $this->cr->getCurrentUser($this);	
-		$page = $request->query->get('page', 1);
-		$limit = $request->query->get('limit', 12);
-		$results = $this->em->getRepository(Notification::class)->findNotifications($current, $page, $limit)->getCurrentPageResults();
-		$notifications = array();
-		foreach ($results as $result) {
-			$notifications[] = $result;
-		}
-		$data = $this->serializer->serialize($notifications, 'json', SerializationContext::create()->setGroups(array('notifications')));
-		$response = new Response($data);
-		$response->headers->set('Content-Type', 'application/json');
-
-		return $response;
 	}
 
     /**

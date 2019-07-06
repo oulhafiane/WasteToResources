@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\HasLifecycleCallbacks
@@ -19,11 +20,13 @@ class Feedback
 
 	/**
 	 * @ORM\Column(type="text")
+	 * @Serializer\Groups({"feedbacks"})
 	 */
 	private $text;
 
 	/**
 	 * @ORM\Column(type="datetime")
+	 * @Serializer\Groups({"feedbacks"})
 	 */
 	private $date;
 
@@ -36,11 +39,13 @@ class Feedback
 	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="feedbacksSent")
 	 * @ORM\JoinColumn(nullable=false)
+	 * @Serializer\Groups({"feedbacks"})
 	 */
 	private $sender;
 
 	/**
 	 * @ORM\Column(type="integer", nullable=true)
+	 * @Serializer\Groups({"feedbacks"})
 	 */
 	private $rate;
 

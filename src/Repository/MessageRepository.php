@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Message;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -12,12 +11,23 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Message[]    findAll()
  * @method Message[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class MessageRepository extends ServiceEntityRepository
+class MessageRepository extends AbstractRepository
 {
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, Message::class);
     }
+
+	public function findByUser($user, $page = 1, $limit = 12)
+	{
+		$qb = $this->createQueryBuilder('n')
+			->select('n');
+		$qb->where($qb->expr()->eq('n.receiver', $user->getId()))
+			->orderBy('n.date', 'desc')
+			;
+		
+		return $this->paginate($qb, $limit, $page);
+	}
 
     // /**
     //  * @return Message[] Returns an array of Message objects

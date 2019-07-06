@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Notification;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -19,7 +18,7 @@ class NotificationRepository extends AbstractRepository
         parent::__construct($registry, Notification::class);
     }
 
-	public function findNotifications($user, $page = 1, $limit = 12)
+	public function findByUser($user, $page = 1, $limit = 12)
 	{
 		$qb = $this->createQueryBuilder('n')
 			->select('n');
