@@ -60,6 +60,28 @@ class ProfileController extends AbstractController
 
 	}
 
+	/**
+	 * @Route("/api/profiles/{email}/feedbacks", name="list_feedbacks_of_user", methods={"GET"})
+	 */
+	public function listFeedbacksAction($email, Request $request)
+	{
+		$user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+		if (null === $user)
+			throw new HttpException(404, 'Not Found.');
+		$page = $request->query->get('page', 1);
+		$limit = $request->query->get('limit', 12);
+		$results = $this->em->getRepository(Feedback::class)->findByUser($user, $page, $limit)->getCurrentPageResults();
+		$feedbacks = array();
+		foreach ($results as $result) {
+			$feedbacks[] = $result;
+		}
+		$data = $this->serializer->serialize($feedbacks, 'json', SerializationContext::create()->setGroups(['feedbacks']));
+		$response = new Response($data);
+		$response->headers->set('Content-Type', 'application/json');
+
+		return $response;
+	}
+
     /**
      * @Route("/api/profiles/{email}/message", name="send_message_to_profile", methods={"POST"})
      */
