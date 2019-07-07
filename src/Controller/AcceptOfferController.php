@@ -101,6 +101,17 @@ class AcceptOfferController extends AbstractController
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
+
+		$update = new Update(
+			'waste_to_resources/notifications',
+			json_encode([
+				'message' => $notification->getMessage(),
+				'type' => $notification->getType(),
+				'reference' => $notification->getReference()
+			]),
+			['waste_to_resources/user/'.$user->getEmail()]
+		);
+		$this->publisher->__invoke($update);
 	}
 
 	private function notifyPurchaseAcceptedToBuyer($buyer, $offer, $seller, $weight)

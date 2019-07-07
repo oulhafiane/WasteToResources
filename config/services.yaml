@@ -8,6 +8,7 @@ parameters:
     locale: 'en'
     env(MERCURE_PUBLISH_URL): ''
     env(MERCURE_JWT_SECRET): ''
+    mercure_secret_key: '%env(MERCURE_SECRET_KEY)%'
 
 services:
     # default configuration for services in *this* file
@@ -32,9 +33,9 @@ services:
     jms_serializer.object_constructor:
         alias: jms_serializer.doctrine_object_constructor
         public: false
-#    App\EventListener\ExceptionListener:
-#        tags:
-#            - { name: kernel.event_listener, event: kernel.exception }
+    App\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
     App\EventListener\PhotoSerializerListener:
         tags:
             - { name: jms_serializer.event_subscriber }

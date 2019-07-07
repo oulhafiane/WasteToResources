@@ -28,7 +28,7 @@ class ProfileController extends AbstractController
 		$this->serializer = $serializer;
 	}
 
-	private function sendMessage($email, $data, $class)
+	private function sendMessage($sender, $email, $data, $class)
 	{
 		$receiver = $this->em->getRepository(User::class)->findOneBy([
 			'email' => $email
@@ -38,10 +38,9 @@ class ProfileController extends AbstractController
 			throw new HttpException(404, 'Not Found.');
 
 		if (!array_key_exists('message', $data))
-			throw new HttpException(406, 'Not Acceptable.');
+			throw new HttpException(406, 'field: message not found.');
 
 		if (null !== $data['message']) {
-			$sender = $this->cr->getCurrentUser($this);
 			$message = new $class();
 			$message->setSender($sender);
 			$message->setReceiver($receiver);
@@ -67,8 +66,12 @@ class ProfileController extends AbstractController
     public function sendMessageAction($email, Request $request)
     {
 		$data = json_decode($request->getContent(), true);
+		$sender = $this->cr->getCurrentUser($this);
 
-		$this->sendMessage($email, $data, Message::class);
+		if ($sender->getEmail() === $email)
+			throw new HttpException(406, 'You cannot send message to yourself.');
+
+		$this->sendMessage($sender, $email, $data, Message::class);
 
 		return $this->json([
 			'code' => 200,
@@ -82,11 +85,18 @@ class ProfileController extends AbstractController
     public function sendFeedbackAction($email, Request $request)
     {
 		$data = json_decode($request->getContent(), true);
+		$sender = $this->cr->getCurrentUser($this);
+
+		if ($sender->getEmail() === $email)
+			throw new HttpException(406, 'You cannot send feedback to yourself.');
 
 		if (!array_key_exists('rate', $data))
-			throw new HttpException(406, 'Not Acceptable.');
+			throw new HttpException(406, 'field: rate not found.');
 
-		$this->sendMessage($email, $data, Feedback::class);
+		if ($data['rate'] > 5 || $data['rate'] < 1)
+			throw new HttpException(406, 'field: rate must be between 1 and 5.');
+
+		$this->sendMessage($sender, $email, $data, Feedback::class);
 
 		return $this->json([
 			'code' => 200,

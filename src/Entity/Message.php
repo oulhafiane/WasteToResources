@@ -32,6 +32,7 @@ class Message
 
     /**
      * @ORM\Column(type="boolean")
+	 * @Serializer\Groups({"messages"})
      */
     private $seen;
 
@@ -84,9 +85,9 @@ class Message
         return $this->seen;
     }
 
-    public function setSeen(bool $seen): self
+    public function setSeen(): self
     {
-        $this->seen = $seen;
+        $this->seen = true;
 
         return $this;
     }

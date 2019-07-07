@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
 use Doctrine\ORM\EntityManagerInterface;
+use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 class CurrentUserController extends AbstractController
 {
@@ -25,6 +27,17 @@ class CurrentUserController extends AbstractController
 		$this->cr = $cr;
 		$this->serializer = $serializer;
 		$this->em = $em;
+	}
+	
+	private function generateJWT()
+	{
+		$user = $this->cr->getCurrentUser($this);	
+		$token = (new Builder())
+			->set('mercure', ['subscribe' => ['waste_to_resources/user/'.$user->getEmail()]])
+			->sign(new Sha256(), $this->getParameter('mercure_secret_key'))
+			->getToken();
+
+		return $token;
 	}
 
 	private function getMessages($request, $class, $groups)
@@ -68,27 +81,20 @@ class CurrentUserController extends AbstractController
 		return $this->getMessages($request, Feedback::class, ['feedbacks']);
 	}
 
-	/**
-	 * @Route("/api/current/notifications/seen", name="notifications_seen", methods={"PATCH"})
-	 */
-	public function seenNotificationAction(Request $request)
+	private function setSeen($class, $findBy, $message)
 	{
-		$current = $this->cr->getCurrentUser($this);	
-		$notifications = $this->em->getRepository(Notification::class)->findBy([
-			'user' => $current,
-			'seen' => false
-		]);
-		foreach ($notifications as $notification) {
-			if ($notification->getSeen() === false) {
-				$notification->setSeen();
-				$this->em->persist($notification);
+		$objects = $this->em->getRepository($class)->findBy($findBy);
+		foreach ($objects as $object) {
+			if ($object->getSeen() === false) {
+				$object->setSeen();
+				$this->em->persist($object);
 			}
 		}
 		try {
 			$this->em->flush();
 			return $this->json([
 				'code' => 200,
-				'message' => 'Notifications updated successfully.'
+				'message' => $message
 			], 200);
 		} catch (\Exception $ex) {
 			return $this->json([
@@ -98,6 +104,32 @@ class CurrentUserController extends AbstractController
 		}
 	}
 
+	/**
+	 * @Route("/api/current/messages/seen", name="messages_seen", methods={"PATCH"})
+	 */
+	public function seenMessagesAction()
+	{
+		$current = $this->cr->getCurrentUser($this);	
+
+		return $this->setSeen(Message::class, [
+			'receiver' => $current,
+			'seen' => false
+		], 'Messages updated successfully.');
+	}
+
+	/**
+	 * @Route("/api/current/notifications/seen", name="notifications_seen", methods={"PATCH"})
+	 */
+	public function seenNotificationAction()
+	{
+		$current = $this->cr->getCurrentUser($this);	
+
+		return $this->setSeen(Notification::class, [
+			'user' => $current,
+			'seen' => false
+		], 'Notifications updated successfully.');
+	}
+
     /**
      * @Route("/api/current/infos", name="current_user_infos", methods={"GET"})
      */
@@ -105,6 +137,9 @@ class CurrentUserController extends AbstractController
     {
 		$current = $this->cr->getCurrentUser($this);	
 		$data = $this->serializer->serialize($current, 'json', SerializationContext::create()->setGroups(array('infos')));
+		$data = json_decode($data, true);
+		$data['mercure_token'] = sprintf("%s", $this->generateJWT());
+		$data = json_encode($data);
 		$response = new Response($data, 200);
 		$response->headers->set('Content-Type', 'application/json');
 
