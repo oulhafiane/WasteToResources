@@ -29,10 +29,7 @@ class Gain
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\OnHold", inversedBy="gain", cascade={"persist", "remove"})
-	 * @ORM\JoinColumns({
-     *     @ORM\JoinColumn(name="offer_id", referencedColumnName="offer_id"),
-	 *     @ORM\JoinColumn(name="user_id", referencedColumnName="user_id")
-     * })
+     * @ORM\JoinColumn(nullable=false)
 	 */
 	private $fromOnHold;
 

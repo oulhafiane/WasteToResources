@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Entity\Bid;
+use App\Entity\Parameter;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
@@ -37,13 +38,16 @@ class AuctionSerializerListener implements EventSubscriberInterface
 			'offer' => $offer,
 			'isActive' => true,
 		], ['price' => 'DESC']);
+		$percentage = $this->em->getRepository(Parameter::class)->get('percentageNextBid')->getValue();
 		$start_price = $offer->getPrice() * $offer->getWeight();
 		if (null === $top_bid)
 			$top_price = $start_price;
 		else
 			$top_price = $top_bid->getPrice();
+		$next_bid = $top_price + ($top_price * $percentage);
 		$visitor = $event->getVisitor();
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\AuctionBid', 'start_price', null), $start_price);
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\AuctionBid', 'top_price', null), $top_price);
+		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\AuctionBid', 'next_bid', null), (int)$next_bid);
 	}
 }

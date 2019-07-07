@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\Mercure;
 use App\Service\Helper;
 use App\Service\CurrentUser;
 use App\Entity\Offer;
@@ -21,8 +22,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Mercure\Publisher;
-use Symfony\Component\Mercure\Update;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AcceptOfferController extends AbstractController
@@ -30,21 +29,21 @@ class AcceptOfferController extends AbstractController
 	private $em;
 	private $cr;
 	private $helper;
-	private $publisher;
+	private $mercure;
 
-	public function __construct(EntityManagerInterface $em, CurrentUser $cr, Helper $helper, Publisher $publisher)
+	public function __construct(EntityManagerInterface $em, CurrentUser $cr, Helper $helper, Mercure $mercure)
 	{
 		$this->em = $em;
 		$this->cr = $cr;
 		$this->helper = $helper;
-		$this->publisher = $publisher;
+		$this->mercure = $mercure;
 	}
 
 	private function refundUser($onhold, $currentUser)
 	{
 		$offer = $onhold->getOffer();
 		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer, 'isActive' => true], ['price' => 'DESC']);
-		$fees = $this->em->getRepository(Parameter::class)->get('feesBid')->getValue();
+		$fees = $onhold->getFees();
 
 		$user = $onhold->getUser();
 		if ($last_bid->getBidder()->getId() === $user->getId()) {
@@ -54,7 +53,7 @@ class AcceptOfferController extends AbstractController
 			$gain->setFromOnHold($onhold);
 		} else {
 			$onhold->setRefunded();
-			$user->setBalance($user->getBalance() + $onhold->getFees());
+			$user->setBalance($user->getBalance() + $fees);
 		}
 
 		$bids = $this->em->getRepository(Bid::class)->findBy([
@@ -102,7 +101,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		$update = new Update(
+		$this->mercure->publish(
 			'waste_to_resources/notifications',
 			json_encode([
 				'message' => $notification->getMessage(),
@@ -111,7 +110,6 @@ class AcceptOfferController extends AbstractController
 			]),
 			['waste_to_resources/user/'.$user->getEmail()]
 		);
-		$this->publisher->__invoke($update);
 	}
 
 	private function notifyPurchaseAcceptedToBuyer($buyer, $offer, $seller, $weight)
@@ -217,20 +215,51 @@ class AcceptOfferController extends AbstractController
 		return $this->handlePurchase($offer, $user, $request, BulkPurchase::class, 'bulk_purchase_id');
 	}
 
+	private function updateLiveAuction($offer, $user, $bid_price, $percentage)
+	{
+		$this->mercure->publish(
+				'waste_to_resources/offers/'.$offer->getId(),
+				json_encode([
+					'next_bid' => $bid_price + ($bid_price * $percentage),
+					'price' => $bid_price,
+					'first_name' => $user->getFirstName(),
+					'last_name' => $user->getLastName(),
+					'email' => $user->getEmail()
+				])
+		);
+
+	}
+
+	private function checkIfBidder($offer, $user)
+	{
+		$onHold = $this->em->getRepository(OnHold::class)->findOneBy([
+			'offer' => $offer,
+			'user' => $user,
+			'paid' => false,
+			'refunded' => false
+		], ['date' => 'DESC']);
+
+		if (null === $onHold)
+			return false;
+		else
+			return true;
+	}
+
 	private function handleAuctionBid($offer, $user, $request)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
 		$fees = $this->em->getRepository(Parameter::class)->get('feesBid')->getValue();
 		if (null === $fees)
 			throw new HttpException(500, 'Cannot get fees details.');
-		if ($user->getBalance() < $fees)
+		$alreadyBidder = $this->checkIfBidder($offer, $user);
+		if (false === $alreadyBidder && $user->getBalance() < $fees)
 			throw new HttpException(406, 'Insufficient balance, you must pay fees of Bid : '.$fees);
-		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer, 'isActive' => true], ['price' => 'DESC']);
 		$data = json_decode($request->getContent(), true);
 		if (!array_key_exists('bid_price', $data))
 			throw new HttpException(406, 'bid_price not found.');
 		$bid_price = $data['bid_price'];
 		$percentage = $this->em->getRepository(Parameter::class)->get('percentageNextBid')->getValue();
+		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer, 'isActive' => true], ['price' => 'DESC']);
 		$total = (null === $last_bid) ? $total + ($total * $percentage) : $last_bid->getPrice() + ($last_bid->getPrice() * $percentage);
 		if (!is_numeric($bid_price) || $bid_price < (int)$total)
 			throw new HttpException(406, 'bid_price not correct, it must be greater than or equal : '.(int)$total);
@@ -238,27 +267,13 @@ class AcceptOfferController extends AbstractController
 		if (null !== $last_bid)
 			$this->notifyBidUpdatedToUser($last_bid->getBidder(), $offer, $user);
 
-		$alreadyBid = false;
-		$last_bid = $this->em->getRepository(Bid::class)->findOneBy([
-			'offer' => $offer,
-			'bidder' => $user
-		], ['date' => 'DESC']);
-		if (null !== $last_bid)
-			$alreadyBid = true;
-
-		if ($alreadyBid === false) {
+		if (false === $alreadyBidder) {
 			$user->setBalance($user->getBalance() - $fees);
 
 			$onHold = new OnHold();
 			$onHold->setOffer($offer);
 			$onHold->setFees($fees);
 			$onHold->setUser($user);
-		} else {
-			$onHold = $this->em->getrepository(OnHold::class)->findOneBy([
-				'offer' => $offer,
-				'user' => $user
-			]);
-			$onHold->init();
 		}
 
 		$bid = new Bid();
@@ -268,26 +283,16 @@ class AcceptOfferController extends AbstractController
 
 		try {
 			$this->em->persist($bid);
-			$this->em->persist($onHold);
-			if ($alreadyBid === false)
+			if (false === $alreadyBidder) {
+				$this->em->persist($onHold);
 				$this->em->persist($user);
+			}
 			$this->em->flush();
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		try {
-			$update = new Update(
-				'waste_to_resources/offers/'.$offer->getId(),
-				json_encode([
-					'price' => $bid_price,
-					'first_name' => $user->getFirstName(),
-					'last_name' => $user->getLastName(),
-					'email' => $user->getEmail()
-				])
-			);
-			$this->publisher->__invoke($update);
-		} catch (\Exception $ex) {}
+		$this->updateLiveAuction($offer, $user, $bid_price, $percentage);
 
 		$extras['bid_id'] = $bid->getId();
 		return $extras;
@@ -365,6 +370,8 @@ class AcceptOfferController extends AbstractController
 		$onhold = $this->em->getRepository(OnHold::class)->findOneBy([
 			'user' => $user,
 			'offer' => $offer,
+			'paid' => false,
+			'refunded' => false
 		]);
 
 		if (null === $onhold) {

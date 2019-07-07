@@ -32,7 +32,7 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=180, unique=true)
 	 * @Assert\NotBlank(groups={"new-user"})
 	 * @Assert\Email(groups={"new-user"})
-	 * @Serializer\Groups({"new-user", "list-offers", "infos", "profile", "messages"})
+	 * @Serializer\Groups({"new-user", "list-offers", "infos", "profile", "messages", "feedbacks"})
 	 */
 	protected $email;
 
@@ -63,7 +63,7 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank(groups={"new-user"})
 	 * @Serializer\SerializedName("firstName")
-	 * @Serializer\Groups({"new-user", "list-offers", "infos", "profile", "messages"})
+	 * @Serializer\Groups({"new-user", "list-offers", "infos", "profile", "messages", "feedbacks"})
 	 */
 	protected $firstName;
 
@@ -71,7 +71,7 @@ abstract class User implements UserInterface
 	 * @ORM\Column(type="string", length=255)
 	 * @Assert\NotBlank(groups={"new-user"})
 	 * @Serializer\SerializedName("lastName")
-	 * @Serializer\Groups({"new-user", "list-offers", "infos", "profile", "messages"})
+	 * @Serializer\Groups({"new-user", "list-offers", "infos", "profile", "messages", "feedbacks"})
 	 */
 	protected $lastName;
 

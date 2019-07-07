@@ -14,7 +14,7 @@ easy_admin:
         - App\Entity\Purchase
         - App\Entity\BulkPurchase
         - App\Entity\Transaction
-          #- App\Entity\OnHold
+        - App\Entity\OnHold
         - App\Entity\Gain
         - App\Entity\Category
         - App\Entity\Parameter

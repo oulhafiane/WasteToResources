@@ -13,13 +13,18 @@ class OnHold
 {
 	/**
 	 * @ORM\Id()
+	 * @ORM\GeneratedValue()
+	 * @ORM\Column(type="integer")
+	 */
+	private $id;
+
+	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\Offer", inversedBy="onHolds")
 	 * @ORM\JoinColumn(nullable=false)
 	 */
 	private $offer;
 
 	/**
-	 * @ORM\Id()
 	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="onHolds")
 	 * @ORM\JoinColumn(nullable=false)
 	 */
@@ -65,6 +70,11 @@ class OnHold
 		$this->refunded = false;
 	}
 
+	public function getId(): ?int
+	{
+		return $this->id;
+	}
+
 	public function isPaid(): ?bool
 	{
 		return $this->paid;
@@ -93,14 +103,6 @@ class OnHold
 			$this->paid = False;
 			$this->refunded = True;
 		}
-
-		return $this;
-	}
-
-	public function init(): self
-	{
-		$this->paid = false;
-		$this->refunded = false;
 
 		return $this;
 	}
