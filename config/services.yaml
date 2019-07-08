@@ -42,6 +42,9 @@ services:
     App\EventListener\UserSerializerListener:
         tags:
             - { name: jms_serializer.event_subscriber }
+    App\EventListener\TransactionSerializerListener:
+        tags:
+            - { name: jms_serializer.event_subscriber }
     Aws\S3\S3Client:
         arguments:
             -

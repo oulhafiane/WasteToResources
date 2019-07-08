@@ -52,6 +52,7 @@ class ProfileController extends AbstractController
 
 			try {
 				$this->em->persist($message);
+				var_dump($message->getSeen());
 				$this->em->flush();
 			} catch (\Exception $ex) {
 				throw new HttpException(406, 'Not Acceptable.');

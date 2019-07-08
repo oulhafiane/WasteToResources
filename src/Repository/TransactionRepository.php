@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Transaction;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -12,12 +11,24 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Transaction[]    findAll()
  * @method Transaction[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TransactionRepository extends ServiceEntityRepository
+class TransactionRepository extends AbstractRepository
 {
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, Transaction::class);
     }
+
+	public function findByUser($user, $page = 1, $limit = 12)
+	{
+		$qb = $this->createQueryBuilder('n')
+			->select('n');
+		$qb->where($qb->expr()->eq('n.buyer', $user->getId()))
+			->orWhere($qb->expr()->eq('n.seller', $user->getId()))
+			->orderBy('n.startDate', 'desc')
+			;
+		
+		return $this->paginate($qb, $limit, $page);
+	}
 
     // /**
     //  * @return Transaction[] Returns an array of Transaction objects

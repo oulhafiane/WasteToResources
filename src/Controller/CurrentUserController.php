@@ -6,10 +6,15 @@ use App\Service\CurrentUser;
 use App\Entity\Notification;
 use App\Entity\Message;
 use App\Entity\Feedback;
+use App\Entity\Transaction;
+use App\Entity\Picker;
+use App\Entity\Reseller;
+use App\Entity\Buyer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,17 +45,17 @@ class CurrentUserController extends AbstractController
 		return $token;
 	}
 
-	private function getMessages($request, $class, $groups)
+	private function getResults($request, $class, $groups)
 	{
 		$current = $this->cr->getCurrentUser($this);	
 		$page = $request->query->get('page', 1);
 		$limit = $request->query->get('limit', 12);
 		$results = $this->em->getRepository($class)->findByUser($current, $page, $limit)->getCurrentPageResults();
-		$notifications = array();
+		$objects = array();
 		foreach ($results as $result) {
-			$notifications[] = $result;
+			$objects[] = $result;
 		}
-		$data = $this->serializer->serialize($notifications, 'json', SerializationContext::create()->setGroups($groups));
+		$data = $this->serializer->serialize($objects, 'json', SerializationContext::create()->setGroups($groups));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 
@@ -58,11 +63,37 @@ class CurrentUserController extends AbstractController
 	}
 
 	/**
+	 * @Route("/api/current/transactions/{id}", name="current_specific_transaction", methods={"GET"}, requirements={"id"="\d+"})
+	 */
+	public function currentSpecificTransactionAction($id)
+	{
+		$current = $this->cr->getCurrentUser($this);
+		$transaction = $this->em->getRepository(Transaction::class)->find($id);
+		if ($current->getId() === $transaction->getBuyer()->getId() || $current->getId() === $transaction->getSeller()->getId()) {
+			$data = $this->serializer->serialize($transaction, 'json', SerializationContext::create()->setGroups(['transactions', "specific"]));
+		} else
+			throw new HttpException(403, 'Forbidden.');
+		
+		$response = new Response($data);
+		$response->headers->set('Content-Type', 'application/json');
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/api/current/transactions", name="current_user_transactions", methods={"GET"})
+	 */
+	public function currentUserTransactionsAction(Request $request)
+	{
+		return $this->getResults($request , Transaction::class, ['transactions']);
+	}
+
+	/**
 	 * @Route("/api/current/notifications", name="current_user_notifications", methods={"GET"})
 	 */
 	public function currentUserNotificationsAction(Request $request)
 	{
-		return $this->getMessages($request, Notification::class, ['notifications']);
+		return $this->getResults($request, Notification::class, ['notifications']);
 	}
 
 	/**
@@ -70,7 +101,7 @@ class CurrentUserController extends AbstractController
 	 */
 	public function currentUserMessagesAction(Request $request)
 	{
-		return $this->getMessages($request, Message::class, ['messages']);
+		return $this->getResults($request, Message::class, ['messages']);
 	}
 
 	/**
@@ -78,7 +109,7 @@ class CurrentUserController extends AbstractController
 	 */
 	public function currentUserFeedbacksAction(Request $request)
 	{
-		return $this->getMessages($request, Feedback::class, ['feedbacks']);
+		return $this->getResults($request, Feedback::class, ['feedbacks']);
 	}
 
 	private function setSeen($class, $findBy, $message)

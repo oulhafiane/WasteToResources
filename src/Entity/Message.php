@@ -55,7 +55,7 @@ class Message
 	public function onPrePersist()
 	{
 		$this->date = new \DateTime();
-		$this->setSeen(0);
+		$this->seen = 0;
 	}
 
     public function getId(): ?int

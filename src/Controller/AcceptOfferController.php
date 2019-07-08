@@ -220,7 +220,7 @@ class AcceptOfferController extends AbstractController
 		$this->mercure->publish(
 				'waste_to_resources/offers/'.$offer->getId(),
 				json_encode([
-					'next_bid' => $bid_price + ($bid_price * $percentage),
+					'next_bid' => (int)($bid_price + ($bid_price * $percentage)),
 					'price' => $bid_price,
 					'first_name' => $user->getFirstName(),
 					'last_name' => $user->getLastName(),

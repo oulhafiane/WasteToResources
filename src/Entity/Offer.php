@@ -23,7 +23,7 @@ abstract class Offer
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
 	 * @Serializer\ReadOnly
-	 * @Serializer\Groups({"list-offers"})
+	 * @Serializer\Groups({"list-offers", "transactions"})
 	 * @Assert\IsNull(groups={"new-offer"})
 	 */
 	protected $id;
@@ -36,7 +36,7 @@ abstract class Offer
 	 *	max = 20,
 	 *	groups={"new-offer"}
 	 * )
-	 * @Serializer\Groups({"new-offer", "list-offers"})
+	 * @Serializer\Groups({"new-offer", "list-offers", "transactions"})
 	 */
 	protected $title;
 

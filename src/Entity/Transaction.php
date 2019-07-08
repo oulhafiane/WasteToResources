@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\HasLifecycleCallbacks
@@ -15,26 +16,34 @@ class Transaction
 	 * @ORM\Id()
 	 * @ORM\GeneratedValue()
 	 * @ORM\Column(type="integer")
+	 * @Serializer\Groups({"transactions"})
 	 */
 	private $id;
 
 	/**
-	 * @ORM\Column(type="boolean", nullable=true)
+	 * @ORM\Column(type="boolean")
 	 */
 	private $completed;
 
 	/**
-	 * @ORM\Column(type="boolean", nullable=true)
+	 * @ORM\Column(type="boolean")
+	 */
+	private $paid;
+
+	/**
+	 * @ORM\Column(type="boolean")
 	 */
 	private $canceled;
 
 	/**
 	 * @ORM\Column(type="datetime")
+	 * @Serializer\Groups({"transactions"})
 	 */
 	private $startDate;
 
 	/**
 	 * @ORM\Column(type="datetime", nullable=true)
+	 * @Serializer\Groups({"transactions"})
 	 */
 	private $endDate;
 
@@ -52,12 +61,14 @@ class Transaction
 
 	/**
 	 * @ORM\Column(type="bigint")
+	 * @Serializer\Groups({"transactions"})
 	 */
 	private $total;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\Offer")
 	 * @ORM\JoinColumn(nullable=false)
+	 * @Serializer\Groups({"transactions"})
 	 */
 	private $offer;
 
@@ -85,16 +96,22 @@ class Transaction
 		$this->endDate = null;
 		$this->setSellerKey(Uuid::uuid4()->toString());
 		$this->setBuyerKey(Uuid::uuid4()->toString());
+		if (null === $this->paid)
+			$this->paid = false;
+		if (null === $this->completed)
+			$this->completed = false;
+		if (null === $this->canceled)
+			$this->canceled = false;
 	}
 
 	public function endTransaction(): self
 	{
 		//Remember to verify keys
-		if ($this->completed === False && $this->canceld === False)
+		if ($this->completed === false && $this->canceld === false)
 		{
 			$this->endDate = new \DateTime();
-			$this->completed = True;
-			$this->canceled = False;
+			$this->completed = true;
+			$this->canceled = false;
 		}
 
 		return $this;
@@ -103,12 +120,19 @@ class Transaction
 	public function cancelTransaction(): self
 	{
 		//Remember to verify keys
-		if ($this->completed === False && $this->canceld === False)
+		if ($this->completed === false && $this->canceld === false)
 		{
 			$this->endDate = new \DateTime();
-			$this->completed = False;
-			$this->canceled = True;
+			$this->completed = false;
+			$this->canceled = true;
 		}
+
+		return $this;
+	}
+
+	public function setPaid(): self
+	{
+		$this->paid = true;
 
 		return $this;
 	}
@@ -121,6 +145,11 @@ class Transaction
 	public function isCompleted(): ?bool
 	{
 		return $this->completed;
+	}
+
+	public function isPaid(): ?bool
+	{
+		return $this->paid;
 	}
 
 	public function isCanceled(): ?bool
@@ -191,22 +220,8 @@ class Transaction
 		return $this->sellerKey;
 	}
 
-	public function setSellerKey(string $sellerKey): self
-	{
-		$this->sellerKey = $sellerKey;
-
-		return $this;
-	}
-
 	public function getBuyerKey(): ?string
 	{
 		return $this->buyerKey;
-	}
-
-	public function setBuyerKey(string $buyerKey): self
-	{
-		$this->buyerKey = $buyerKey;
-
-		return $this;
 	}
 }
