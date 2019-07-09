@@ -49,6 +49,11 @@ class Message
      */
     private $sender;
 
+	public function __toString()
+	{
+		return $this->getText();
+	}
+
 	/**
 	 * @ORM\PrePersist
 	 */

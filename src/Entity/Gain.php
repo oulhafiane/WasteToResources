@@ -33,6 +33,11 @@ class Gain
 	 */
 	private $fromOnHold;
 
+	public function __toString()
+	{
+		return $this->getId()." : ".$this->getTotal();
+	}
+
 	/**
 	 * @ORM\PrePersist
 	 */

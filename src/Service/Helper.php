@@ -30,4 +30,20 @@ class Helper
 		}
 		throw new HttpException(500, 'Cannot get fees details.');
 	}
+
+	public function getTransactionEtat($transaction)
+	{
+		if (true === $transaction->isCompleted() && false === $transaction->isCanceled())
+			$etat = 2;
+		else if (false === $transaction->isCompleted() && true === $transaction->isCanceled())
+			$etat = -1;
+		else if (true === $transaction->isPaid())
+			$etat = 1;
+		else if (false === $transaction->isPaid())
+			$etat = 0;
+		else
+			$etat = -2;
+
+		return $etat;
+	}
 }

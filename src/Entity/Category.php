@@ -31,6 +31,11 @@ class Category
 	 */
 	private $offers;
 
+	public function __toString()
+	{
+		return $this->getLabel();
+	}
+
 	public function __construct()
 	{
 		$this->offers = new ArrayCollection();

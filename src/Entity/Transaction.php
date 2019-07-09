@@ -107,7 +107,7 @@ class Transaction
 	public function endTransaction(): self
 	{
 		//Remember to verify keys
-		if ($this->completed === false && $this->canceld === false)
+		if ($this->completed === false && $this->canceled === false)
 		{
 			$this->endDate = new \DateTime();
 			$this->completed = true;

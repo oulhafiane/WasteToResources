@@ -128,6 +128,11 @@ abstract class Offer
 
 	private $tmpEndDate;
 
+	private function __toString()
+	{
+		return $this->getTitle();
+	}
+
 	public function __construct()
 	{
 		$this->onHolds = new ArrayCollection();

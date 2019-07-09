@@ -51,6 +51,11 @@ class Bid
 	 */
 	private $isActive;
 
+	public function __toString()
+	{
+		return "Offer: ".$this->getOffer();
+	}
+
 	/**
 	 * @ORM\PrePersist
 	 */

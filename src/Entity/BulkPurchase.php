@@ -29,6 +29,11 @@ class BulkPurchase extends MappedPurchase
 	 */
 	private $seller;
 
+	public function __toString()
+	{
+		return "Offer: ".$this->getOffer();
+	}
+
     public function getId(): ?int
     {
         return $this->id;

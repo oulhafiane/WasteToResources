@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\Helper;
 use App\Service\CurrentUser;
 use App\Entity\Notification;
 use App\Entity\Message;
@@ -26,12 +27,14 @@ class CurrentUserController extends AbstractController
 	private $cr;
 	private $serializer;
 	private $em;
+	private $helper;
 
-	public function __construct(CurrentUser $cr, SerializerInterface $serializer, EntityManagerInterface $em)
+	public function __construct(CurrentUser $cr, SerializerInterface $serializer, EntityManagerInterface $em, Helper $helper)
 	{
 		$this->cr = $cr;
 		$this->serializer = $serializer;
 		$this->em = $em;
+		$this->helper = $helper;
 	}
 	
 	private function generateJWT()
@@ -62,18 +65,130 @@ class CurrentUserController extends AbstractController
 		return $response;
 	}
 
+	private function getTransaction($id)
+	{
+		$current = $this->cr->getCurrentUser($this);
+		$transaction = $this->em->getRepository(Transaction::class)->find($id);
+		if ($current->getId() !== $transaction->getBuyer()->getId() && $current->getId() !== $transaction->getSeller()->getId())
+			throw new HttpException(403, 'Forbidden.');
+
+		return $transaction;
+	}
+
+	private function verifyTransaction($request, $transaction)
+	{
+		$data = json_decode($request->getContent(), true);
+
+		if (null === $data)
+			throw new HttpException(406, 'Not Acceptable.');
+
+		if (!array_key_exists('transaction_id', $data)
+			|| !array_key_exists('offer_id', $data)
+			|| !array_key_exists('start_date', $data)
+			|| !array_key_exists('key', $data))
+			throw new HttpException(406, 'Not Acceptable.');
+
+		if ($data['transaction_id'] !== $transaction->getId())
+			throw new HttpException(406, 'Not Acceptable.');
+
+		if ($data['offer_id'] !== $transaction->getOffer()->getId())
+			throw new HttpException(406, 'Not Acceptable.');
+
+		$date = new \DateTime($data['start_date']);
+		$diff = $transaction->getStartDate()->diff($date);
+		if (0 !== $diff->days || 0 !== $diff->invert || 0 !== $diff->y
+			|| 0 !== $diff->m || 0 !== $diff->d || 0 !== $diff->h
+			|| 0 !== $diff->h || 0 !== $diff->i || 0 !== $diff->s)
+			throw new HttpException(406, 'Not Acceptable.');
+
+		if ($data['key'] !== $transaction->getBuyerKey())
+			throw new HttpException(406, 'Not Acceptable.');
+	}
+
+	/**
+	 * @Route("/api/current/transactions/{id}/terminate", name="current_terminate_transaction", methods={"PATCH"}, requirements={"id"="\d+"})
+	 */
+	public function currentTerminateTransaction($id, Request $request)
+	{
+		$transaction = $this->getTransaction($id);
+		$etat = $this->helper->getTransactionEtat($transaction);	
+
+		if ($etat !== 1)
+			throw new HttpException(406, 'This transaction cannot be terminated.');
+		
+		$buyer = $transaction->getBuyer();
+		$seller = $transaction->getSeller();
+		$current = $this->cr->getCurrentUser($this);
+
+		if ($current->getId() !== $seller->getId())
+			throw new HttpException(406, 'You are not the seller of this transaction.');
+
+		$this->verifyTransaction($request, $transaction);
+
+		$total = $transaction->getTotal();
+		$seller->setBalance($seller->getBalance() + $total);
+		$transaction->endTransaction();
+
+		try {
+			$this->em->persist($seller);
+			$this->em->persist($transaction);
+			$this->em->flush();
+		} catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+
+		return $this->json([
+			'code' => 200,
+			'message' => "Your transaction is complete."
+		]);
+	}
+
+	/**
+	 * @Route("/api/current/transactions/{id}/pay", name="current_pay_transaction", methods={"PATCH"}, requirements={"id"="\d+"})
+	 */
+	public function currentPayTransactionAction($id)
+	{
+		$transaction = $this->getTransaction($id);
+		$etat = $this->helper->getTransactionEtat($transaction);	
+
+		if ($etat !== 0)
+			throw new HttpException(406, 'This transaction cannot be paid.');
+		
+		$buyer = $transaction->getBuyer();
+		$seller = $transaction->getSeller();
+		$current = $this->cr->getCurrentUser($this);
+
+		if ($current->getId() !== $buyer->getId())
+			throw new HttpException(406, 'You are not the buyer of this transaction.');
+
+		$total = $transaction->getTotal();
+		if ($buyer->getBalance() < $total)
+			throw new HttpException(406, 'Insufficient balance.');
+
+		$buyer->setBalance($buyer->getBalance() - $total);
+		$transaction->setPaid();
+
+		try {
+			$this->em->persist($buyer);
+			$this->em->persist($transaction);
+			$this->em->flush();
+		} catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+
+		return $this->json([
+			'code' => 200,
+			'message' => "Your payment has been successfully processed."
+		]);
+	}
+
 	/**
 	 * @Route("/api/current/transactions/{id}", name="current_specific_transaction", methods={"GET"}, requirements={"id"="\d+"})
 	 */
 	public function currentSpecificTransactionAction($id)
 	{
-		$current = $this->cr->getCurrentUser($this);
-		$transaction = $this->em->getRepository(Transaction::class)->find($id);
-		if ($current->getId() === $transaction->getBuyer()->getId() || $current->getId() === $transaction->getSeller()->getId()) {
-			$data = $this->serializer->serialize($transaction, 'json', SerializationContext::create()->setGroups(['transactions', "specific"]));
-		} else
-			throw new HttpException(403, 'Forbidden.');
-		
+		$transaction = $this->getTransaction($id);
+		$data = $this->serializer->serialize($transaction, 'json', SerializationContext::create()->setGroups(['transactions', "specific"]));
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 

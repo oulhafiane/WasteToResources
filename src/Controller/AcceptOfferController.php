@@ -140,6 +140,7 @@ class AcceptOfferController extends AbstractController
 		$transaction->setSeller($offer->getOwner());
 		$transaction->setTotal($total);
 		$transaction->setOffer($offer);
+		$transaction->setPaid();
 
 		$onHold = new OnHold();
 		$onHold->setOffer($offer);

@@ -173,6 +173,11 @@ abstract class User implements UserInterface
 	 */
 	private $onHolds;
 
+	public function __toString()
+	{
+		return $this->getEmail();
+	}
+
 	public function __construct()
 	{
 		$this->inbox = new ArrayCollection();

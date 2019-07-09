@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use App\Entity\Transaction;
 use App\Service\CurrentUser;
+use App\Service\Helper;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
@@ -15,11 +16,13 @@ class TransactionSerializerListener extends AbstractController implements EventS
 {
 	private $em;
 	private $cr;
+	private $helper;
 
-	public function __construct(EntityManagerInterface $em, CurrentUser $cr)
+	public function __construct(EntityManagerInterface $em, CurrentUser $cr, Helper $helper)
 	{
 		$this->em = $em;
 		$this->cr = $cr;
+		$this->helper = $helper;
 	}
 
 	public static function getSubscribedEvents()
@@ -53,16 +56,7 @@ class TransactionSerializerListener extends AbstractController implements EventS
 		} else
 			throw new HttpException(403, 'Forbidden.');
 
-		if (true === $transaction->isCompleted() && false === $transaction->isCanceled())
-			$etat = 2;
-		else if (false === $transaction->isCompleted() && true === $transaction->isCanceled())
-			$etat = -1;
-		else if (true === $transaction->isPaid())
-			$etat = 1;
-		else if (false === $transaction->isPaid())
-			$etat = 0;
-		else
-			$etat = -2;
+		$etat = $this->helper->getTransactionEtat($transaction);
 
 		$visitor = $event->getVisitor();
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'with', null), $with->getEmail());
@@ -70,13 +64,13 @@ class TransactionSerializerListener extends AbstractController implements EventS
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'role', null), $youAre);
 
 		$groups = $event->getContext()->getAttribute('groups');
-		if (in_array('specific', $groups)) {
+		if ($etat === 1 && in_array('specific', $groups)) {
 			switch ($youAre) {
 				case 'buyer':
-					$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'your_key', null), $transaction->getBuyerKey());
+					$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'key', null), $transaction->getBuyerKey());
 					break;
 				case 'seller':
-					$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'your_key', null), $transaction->getSellerKey());
+					$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'key', null), $transaction->getSellerKey());
 					break;
 			}
 		}
