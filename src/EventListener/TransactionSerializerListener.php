@@ -58,8 +58,14 @@ class TransactionSerializerListener extends AbstractController implements EventS
 
 		$etat = $this->helper->getTransactionEtat($transaction);
 
+		$withInfos = array(
+			'email' => $with->getEmail(),
+			'firstName' => $with->getFirstName(),
+			'lastName' => $with->getLastName()
+		);
+
 		$visitor = $event->getVisitor();
-		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'with', null), $with->getEmail());
+		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'with', null), $withInfos);
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'etat', null), $etat);
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'role', null), $youAre);
 
