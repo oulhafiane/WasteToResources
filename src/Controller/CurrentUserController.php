@@ -196,6 +196,21 @@ class CurrentUserController extends AbstractController
 	}
 
 	/**
+	 * @Route("/api/current/transactions/count", name="current_count_transactions", methods={"GET"})
+	 */
+	public function currentCountTransactionsAction()
+	{
+		$count = $this->em->getRepository(Transaction::class)->count([]);
+
+		return $this->json([
+			'code' => 200,
+			'message' => 'Your request was successfully submitted.',
+			'extras' => ['count' => $count]
+		]);
+	}
+
+
+	/**
 	 * @Route("/api/current/transactions", name="current_user_transactions", methods={"GET"})
 	 */
 	public function currentUserTransactionsAction(Request $request)

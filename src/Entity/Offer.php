@@ -128,7 +128,7 @@ abstract class Offer
 
 	private $tmpEndDate;
 
-	private function __toString()
+	public function __toString()
 	{
 		return $this->getTitle();
 	}
