@@ -20,4 +20,15 @@ abstract class AbstractOfferRepository extends AbstractRepository
 
 		return $this->paginate($qb, $limit, $page);
 	}
+
+	public function findByUser($user, $page = 1, $limit = 12)
+	{
+		$qb = $this->createQueryBuilder('n')
+			->select('n');
+		$qb->where($qb->expr()->eq('n.owner', $user->getId()))
+			->orderBy('n.startDate', 'desc')
+			;
+
+		return $this->paginate($qb, $limit, $page);
+	}
 }

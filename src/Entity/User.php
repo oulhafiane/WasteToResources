@@ -38,6 +38,7 @@ abstract class User implements UserInterface
 
 	/**
 	 * @ORM\Column(type="json")
+	 * @Serializer\Groups({"infos"})
 	 */
 	protected $roles = [];
 

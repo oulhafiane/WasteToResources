@@ -11,6 +11,11 @@ use App\Entity\Transaction;
 use App\Entity\Picker;
 use App\Entity\Reseller;
 use App\Entity\Buyer;
+use App\Entity\Offer;
+use App\Entity\SaleOffer;
+use App\Entity\PurchaseOffer;
+use App\Entity\BulkPurchaseOffer;
+use App\Entity\AuctionBid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -216,6 +221,27 @@ class CurrentUserController extends AbstractController
 	public function currentUserTransactionsAction(Request $request)
 	{
 		return $this->getResults($request , Transaction::class, ['transactions']);
+	}
+
+	/**
+	 * @Route("/api/current/offers", name="current_user_offers", methods={"GET"})
+	 */
+	public function currentUserOffersAction(Request $request)
+	{
+		$current = $this->cr->getCurrentUser($this);	
+
+		if ($current instanceof Picker)
+			return $this->getResults($request, SaleOffer::class, ['list-offers']);
+		else if ($current instanceof Reseller) {
+			$type = $request->query->get('type', 'auction');
+			if ($type === 'purchase')
+				return $this->getResults($request, PurchaseOffer::class, ['list-offers']);
+			else
+				return $this->getResults($request, AuctionBid::class, ['list-offers']);
+		} else if ($current instanceof Buyer)
+			return $this->getResults($request, BulkPurchaseOffer::class, ['list-offers']);
+
+		throw new HttpException(500, "An error occured.");
 	}
 
 	/**
