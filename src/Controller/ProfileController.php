@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Entity\Message;
 use App\Entity\Feedback;
 use App\Service\CurrentUser;
+use App\Service\Mercure;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,12 +21,14 @@ class ProfileController extends AbstractController
 	private $cr;
 	private $em;
 	private $serializer;
+	private $mercure;
 
-	public function __construct(CurrentUser $cr, EntityManagerInterface $em, SerializerInterface $serializer)
+	public function __construct(CurrentUser $cr, EntityManagerInterface $em, SerializerInterface $serializer, Mercure $mercure)
 	{
 		$this->cr = $cr;
 		$this->em = $em;
 		$this->serializer = $serializer;
+		$this->mercure = $mercure;
 	}
 
 	private function sendMessage($sender, $email, $data, $class)
@@ -52,13 +55,13 @@ class ProfileController extends AbstractController
 
 			try {
 				$this->em->persist($message);
-				var_dump($message->getSeen());
 				$this->em->flush();
 			} catch (\Exception $ex) {
 				throw new HttpException(406, 'Not Acceptable.');
 			}
-		}
 
+			$this->mercure->publishMessage($message, $receiver);
+		}
 	}
 
 	/**

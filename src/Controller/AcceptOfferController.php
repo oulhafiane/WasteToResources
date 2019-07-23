@@ -101,15 +101,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		$this->mercure->publish(
-			'waste_to_resources/notifications',
-			json_encode([
-				'message' => $notification->getMessage(),
-				'type' => $notification->getType(),
-				'reference' => $notification->getReference()
-			]),
-			['waste_to_resources/user/'.$user->getEmail()]
-		);
+		$this->mercure->publishNotification($notification, $user);
 	}
 
 	private function notifyPurchaseAcceptedToBuyer($buyer, $offer, $seller, $weight)
@@ -125,6 +117,25 @@ class AcceptOfferController extends AbstractController
 		} catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
+
+		$this->mercure->publishNotification($notification, $buyer);
+	}
+
+	private function notifySaleAcceptedToOwner($owner, $offer, $buyer)
+	{
+		$notification = new Notification();
+		$notification->setUser($buyer);
+		$notification->setType(2);
+		$notification->setReference($offer->getId());
+		$notification->setMessage($buyer->getFirstName()." ".$buyer->getLastName()." accepted to buy from you : ".$offer->getTitle().".");
+
+		try {
+			$this->em->persist($notification);
+		} catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+
+		$this->mercure->publishNotification($notification, $buyer);
 	}
 
 	private function handleSaleOffer($offer, $user)
@@ -161,6 +172,8 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
+		$this->notifySaleAcceptedToOwner($offer->getOwner(), $offer, $user);
+
 		$extras['transaction_id'] = $transaction->getId();
 		return $extras;
 	}
@@ -193,14 +206,14 @@ class AcceptOfferController extends AbstractController
 		$purchase->setOffer($offer);
 		$purchase->setSeller($user);
 
-		$this->notifyPurchaseAcceptedToBuyer($offer->getOwner(), $offer, $user, $weight);
-
 		try {
 			$this->em->persist($purchase);
 			$this->em->flush();
 		} catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
+
+		$this->notifyPurchaseAcceptedToBuyer($offer->getOwner(), $offer, $user, $weight);
 
 		$extras[$extra_param] = $purchase->getId();
 		return $extras;
@@ -214,21 +227,6 @@ class AcceptOfferController extends AbstractController
 	private function handleBulkPurchaseOffer($offer, $user, $request)
 	{
 		return $this->handlePurchase($offer, $user, $request, BulkPurchase::class, 'bulk_purchase_id');
-	}
-
-	private function updateLiveAuction($offer, $user, $bid_price, $percentage)
-	{
-		$this->mercure->publish(
-				'waste_to_resources/offers/'.$offer->getId(),
-				json_encode([
-					'next_bid' => (int)($bid_price + ($bid_price * $percentage)),
-					'price' => $bid_price,
-					'first_name' => $user->getFirstName(),
-					'last_name' => $user->getLastName(),
-					'email' => $user->getEmail()
-				])
-		);
-
 	}
 
 	private function checkIfBidder($offer, $user)
@@ -293,7 +291,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		$this->updateLiveAuction($offer, $user, $bid_price, $percentage);
+		$this->mercure->updateLiveAuction($offer, $user, $bid_price, $percentage);
 
 		$extras['bid_id'] = $bid->getId();
 		return $extras;

@@ -37,6 +37,8 @@ class Helper
 			$etat = 2;
 		else if (false === $transaction->isCompleted() && true === $transaction->isCanceled())
 			$etat = -1;
+		else if ($transaction->isCompleted() === $transaction->isCanceled())
+			$etat = -2;
 		else if (true === $transaction->isPaid())
 			$etat = 1;
 		else if (false === $transaction->isPaid())

@@ -146,7 +146,7 @@ class CurrentUserController extends AbstractController
 
 		return $this->json([
 			'code' => 200,
-			'message' => "Your transaction is complete."
+			'message' => "Your transaction has been successfully completed."
 		]);
 	}
 

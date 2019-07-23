@@ -154,7 +154,7 @@ class Transaction
 
 	public function isCanceled(): ?bool
 	{
-		return $this->completed;
+		return $this->canceled;
 	}
 
 	public function getStartDate(): ?\DateTimeInterface
