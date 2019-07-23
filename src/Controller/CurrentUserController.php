@@ -234,13 +234,19 @@ class CurrentUserController extends AbstractController
 	/**
 	 * @Route("/api/current/offers/count", name="current_user_offers_count", methods={"GET"})
 	 */
-	public function currentUserOffersCountAction()
+	public function currentUserOffersCountAction(Request $request)
 	{
 		$current = $this->cr->getCurrentUser($this);	
 
+		$type = $request->query->get('type', null);
+
 		$sql = "select count(*) as total from offer where owner_id = ?";
+		if (null !== $type)
+			$sql .= " and type = ?";
 		$stmt = $this->em->getConnection()->prepare($sql);
 		$stmt->bindValue(1, $current->getId());
+		if (null !== $type)
+			$stmt->bindValue(2, $type);
 		$stmt->execute();
 		$count = $stmt->fetch();
 
