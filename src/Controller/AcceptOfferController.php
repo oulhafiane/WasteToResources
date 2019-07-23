@@ -64,7 +64,7 @@ class AcceptOfferController extends AbstractController
 
 		try {
 			foreach ($bids as $bid) {
-				$bid->setIsActive(false);
+				$bid->setInactive();
 				$this->em->persist($bid);
 			}
 			if ($last_bid->getBidder()->getId() === $user->getId()) {
@@ -149,7 +149,7 @@ class AcceptOfferController extends AbstractController
 
 
 		$offer->setBuyer($user);
-		$offer->setIsActive(False);
+		$offer->setInactive();
 
 		try {
 			$this->em->persist($transaction);

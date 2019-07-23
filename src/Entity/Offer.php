@@ -146,7 +146,7 @@ abstract class Offer
 		$date = new \DateTime(date("Y-m-d H:i:s"));
 		$this->startDate = $date;
 		$this->endDate = $this->tmpEndDate;
-		$this->setIsActive(True);
+		$this->isActive = true;
 		//	$this->photos = new ArrayCollection();
 	}
 
@@ -297,9 +297,9 @@ abstract class Offer
 		return $this->isActive;
 	}
 
-	public function setIsActive(bool $isActive): self
+	public function setInactive(): self
 	{
-		$this->isActive = $isActive;
+		$this->isActive = false;
 
 		return $this;
 	}

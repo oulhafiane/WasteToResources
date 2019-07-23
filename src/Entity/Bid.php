@@ -116,9 +116,9 @@ class Bid
 		return $this->isActive;
 	}
 
-	public function setIsActive(bool $isActive): self
+	public function setInactive(): self
 	{
-		$this->isActive = $isActive;
+		$this->isActive = false;
 
 		return $this;
 	}

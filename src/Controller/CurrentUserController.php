@@ -209,7 +209,7 @@ class CurrentUserController extends AbstractController
 	{
 		$current = $this->cr->getCurrentUser($this);	
 
-		$sql = "select count(*) from transaction where buyer_id = ? OR seller_id = ?";
+		$sql = "select count(*) as total from transaction where buyer_id = ? OR seller_id = ?";
 		$stmt = $this->em->getConnection()->prepare($sql);
 		$stmt->bindValue(1, $current->getId());
 		$stmt->bindValue(2, $current->getId());
@@ -219,7 +219,7 @@ class CurrentUserController extends AbstractController
 		return $this->json([
 			'code' => 200,
 			'message' => 'Your request was successfully submitted.',
-			'extras' => ['count' => $count]
+			'extras' => ['count' => $count['total']]
 		]);
 	}
 
@@ -238,7 +238,7 @@ class CurrentUserController extends AbstractController
 	{
 		$current = $this->cr->getCurrentUser($this);	
 
-		$sql = "select count(*) from offer where owner_id = ?";
+		$sql = "select count(*) as total from offer where owner_id = ?";
 		$stmt = $this->em->getConnection()->prepare($sql);
 		$stmt->bindValue(1, $current->getId());
 		$stmt->execute();
@@ -247,7 +247,7 @@ class CurrentUserController extends AbstractController
 		return $this->json([
 			'code' => 200,
 			'message' => 'Your request was successfully submitted.',
-			'extras' => ['count' => $count]
+			'extras' => ['count' => $count['total']]
 		]);
 	}
 
@@ -310,13 +310,20 @@ class CurrentUserController extends AbstractController
 	{
 		$current = $this->cr->getCurrentUser($this);	
 		
-		$sql = "select count(*) as total, u.email as sender, (select m2.text from message m2 where m2.sender_id = m0.sender_id AND m2.receiver_id = m0.receiver_id ORDER BY m2.date DESC LIMIT 1) as last_message from message m0 join user u on m0.sender_id = u.id where m0.receiver_id = ? group by m0.sender_id";
+		$sql = "select count(*) as total, count(seen) - sum(seen) as count_not_seen, u.email as sender, (select m2.text from message m2 where m2.sender_id = m0.sender_id AND m2.receiver_id = m0.receiver_id ORDER BY m2.date DESC LIMIT 1) as last_message from message m0 join user u on m0.sender_id = u.id where m0.receiver_id = ? group by m0.sender_id";
 		$stmt = $this->em->getConnection()->prepare($sql);
 		$stmt->bindValue(1, $current->getId());
 		$stmt->execute();
 		$results = $stmt->fetchAll();
 
-		$data = $this->serializer->serialize($results, 'json');
+		$count_not_seen = $this->em->getRepository(Message::class)->getCountNotSeenByUser($current);
+
+		$data = [
+			'total_not_seen' => $count_not_seen,
+			'messages' => $results
+		];
+
+		$data = $this->serializer->serialize($data, 'json');
 		$response = new Response($data);
 		$response->headers->set('Content-Type', 'application/json');
 

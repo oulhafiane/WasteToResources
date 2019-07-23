@@ -30,6 +30,17 @@ class MessageRepository extends AbstractRepository
 		return $this->paginate($qb, $limit, $page);
 	}
 
+	public function getCountNotSeenByUser($receiver)
+	{
+		$qb = $this->createQueryBuilder('n')
+			->select('count(n)');
+		$qb->where($qb->expr()->eq('n.receiver', $receiver->getId()))
+			->andWhere('n.seen = 0');
+
+		return $qb->getQuery()
+			->getSingleScalarResult();
+	}
+
     // /**
     //  * @return Message[] Returns an array of Message objects
     //  */
