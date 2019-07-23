@@ -8,6 +8,7 @@ use App\Entity\Notification;
 use App\Entity\Message;
 use App\Entity\Feedback;
 use App\Entity\Transaction;
+use App\Entity\User;
 use App\Entity\Picker;
 use App\Entity\Reseller;
 use App\Entity\Buyer;
@@ -26,6 +27,7 @@ use JMS\Serializer\SerializationContext;
 use Doctrine\ORM\EntityManagerInterface;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 class CurrentUserController extends AbstractController
 {
@@ -205,7 +207,14 @@ class CurrentUserController extends AbstractController
 	 */
 	public function currentCountTransactionsAction()
 	{
-		$count = $this->em->getRepository(Transaction::class)->count([]);
+		$current = $this->cr->getCurrentUser($this);	
+
+		$sql = "select count(*) from transaction where buyer_id = ? OR seller_id = ?";
+		$stmt = $this->em->getConnection()->prepare($sql);
+		$stmt->bindValue(1, $current->getId());
+		$stmt->bindValue(2, $current->getId());
+		$stmt->execute();
+		$count = $stmt->fetch();
 
 		return $this->json([
 			'code' => 200,
@@ -214,13 +223,32 @@ class CurrentUserController extends AbstractController
 		]);
 	}
 
-
 	/**
 	 * @Route("/api/current/transactions", name="current_user_transactions", methods={"GET"})
 	 */
 	public function currentUserTransactionsAction(Request $request)
 	{
 		return $this->getResults($request , Transaction::class, ['transactions']);
+	}
+
+	/**
+	 * @Route("/api/current/offers/count", name="current_user_offers_count", methods={"GET"})
+	 */
+	public function currentUserOffersCountAction()
+	{
+		$current = $this->cr->getCurrentUser($this);	
+
+		$sql = "select count(*) from offer where owner_id = ?";
+		$stmt = $this->em->getConnection()->prepare($sql);
+		$stmt->bindValue(1, $current->getId());
+		$stmt->execute();
+		$count = $stmt->fetch();
+
+		return $this->json([
+			'code' => 200,
+			'message' => 'Your request was successfully submitted.',
+			'extras' => ['count' => $count]
+		]);
 	}
 
 	/**
@@ -253,11 +281,46 @@ class CurrentUserController extends AbstractController
 	}
 
 	/**
+	 * @Route("/api/current/messages/{email}", name="current_user_specific_messages", methods={"GET"})
+	 */
+	public function currentUserSpecificMessagesAction(Request $request, $email)
+	{
+		$current = $this->cr->getCurrentUser($this);	
+		$page = $request->query->get('page', 1);
+		$limit = $request->query->get('limit', 12);
+		$user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+		if (null === $user)
+			throw new HttpException(404, 'Email not found');
+		$results = $this->em->getRepository(Message::class)->findByUser($user, $current, $page, $limit)->getCurrentPageResults();
+		$objects = array();
+		foreach ($results as $result) {
+			$objects[] = $result;
+		}
+		$data = $this->serializer->serialize($objects, 'json', SerializationContext::create()->setGroups(['messages']));
+		$response = new Response($data);
+		$response->headers->set('Content-Type', 'application/json');
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/api/current/messages", name="current_user_messages", methods={"GET"})
 	 */
 	public function currentUserMessagesAction(Request $request)
 	{
-		return $this->getResults($request, Message::class, ['messages']);
+		$current = $this->cr->getCurrentUser($this);	
+		
+		$sql = "select count(*) as total, u.email as sender, (select m2.text from message m2 where m2.sender_id = m0.sender_id AND m2.receiver_id = m0.receiver_id ORDER BY m2.date DESC LIMIT 1) as last_message from message m0 join user u on m0.sender_id = u.id where m0.receiver_id = ? group by m0.sender_id";
+		$stmt = $this->em->getConnection()->prepare($sql);
+		$stmt->bindValue(1, $current->getId());
+		$stmt->execute();
+		$results = $stmt->fetchAll();
+
+		$data = $this->serializer->serialize($results, 'json');
+		$response = new Response($data);
+		$response->headers->set('Content-Type', 'application/json');
+
+		return $response;
 	}
 
 	/**

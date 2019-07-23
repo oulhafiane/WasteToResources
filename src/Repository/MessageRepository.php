@@ -18,11 +18,12 @@ class MessageRepository extends AbstractRepository
         parent::__construct($registry, Message::class);
     }
 
-	public function findByUser($user, $page = 1, $limit = 12)
+	public function findByUser($sender, $receiver, $page = 1, $limit = 12)
 	{
 		$qb = $this->createQueryBuilder('n')
 			->select('n');
-		$qb->where($qb->expr()->eq('n.receiver', $user->getId()))
+		$qb->where($qb->expr()->eq('n.receiver', $receiver->getId()))
+			->andWhere($qb->expr()->eq('n.sender', $sender->getId()))
 			->orderBy('n.date', 'desc')
 			;
 		
