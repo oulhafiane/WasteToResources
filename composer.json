@@ -9,7 +9,6 @@
         "doctrine/annotations": "^1.6",
         "doctrine/collections": "^1.6",
         "easycorp/easyadmin-bundle": "^2.2",
-        "jms/job-queue-bundle": "^2.0",
         "jms/serializer-bundle": "^3.3",
         "lcobucci/jwt": "^3.3",
         "league/flysystem-aws-s3-v3": "^1.0",

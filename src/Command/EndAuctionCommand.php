@@ -23,7 +23,7 @@ class EndAuctionCommand extends ContainerAwareCommand
 	protected function configure()
 	{
 		$this
-			->setName('auction:end')
+			->setName('offer:end')
 			->setDescription('Ending Auction')
 			->addArgument(
 				'auction_id',
@@ -52,7 +52,6 @@ class EndAuctionCommand extends ContainerAwareCommand
 				die("It's early to close it, sorry!\n");
 			if (false === $offer->getIsActive())
 				die("Auction already inactive.\n");
-			$output->writeln($offer->getBids()[0]->getBidder()->__toString());		
 			$output->writeln(date_format($offer->getStartDate(), 'Y-m-d H:i:s'));
 		}
 

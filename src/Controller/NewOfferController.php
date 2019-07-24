@@ -20,6 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use JMS\JobQueueBundle\Entity\Job;
 
 class NewOfferController extends AbstractController
 {
@@ -72,8 +73,10 @@ class NewOfferController extends AbstractController
 			}
 		}
 
-		$offer->setTmpEndDate(new \DateTime(date("Y-m-d H:i:s", strtotime("+".$realPeriod->getValue()." day"))));
-
+		$endDate = new \DateTime(date("Y-m-d H:i:s", strtotime("+".$realPeriod->getValue()." day")));
+		//$endDate = new \DateTime(date("Y-m-d H:i:s", strtotime("+5 minute")));
+		$offer->setTmpEndDate($endDate);
+		
 		if (null === $fees)
 			return;
 

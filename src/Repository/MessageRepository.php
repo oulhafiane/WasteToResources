@@ -22,8 +22,14 @@ class MessageRepository extends AbstractRepository
 	{
 		$qb = $this->createQueryBuilder('n')
 			->select('n');
-		$qb->where($qb->expr()->eq('n.receiver', $receiver->getId()))
-			->andWhere($qb->expr()->eq('n.sender', $sender->getId()))
+		$qb->where($qb->expr()->andX(
+				$qb->expr()->eq('n.receiver', $receiver->getId()),
+				$qb->expr()->eq('n.sender', $sender->getId())
+			))
+			->orWhere($qb->expr()->andX(
+				$qb->expr()->eq('n.receiver', $sender->getId()),
+				$qb->expr()->eq('n.sender', $receiver->getId())
+			))
 			->orderBy('n.date', 'desc')
 			;
 		

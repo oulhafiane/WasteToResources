@@ -12,7 +12,7 @@ abstract class AbstractRepository extends ServiceEntityRepository
 	protected function paginate(QueryBuilder $qb, $limit = 12, $page = 1)
 	{
 		if (0 >= $limit || 0 >= $page) {
-			throw new \LogicException('page must be greater than 0.');
+			throw new \LogicException('page and limit must be greater than 0.');
 		}
 
 		$pager = new Pagerfanta(new DoctrineORMAdapter($qb));
