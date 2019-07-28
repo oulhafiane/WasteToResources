@@ -33,7 +33,7 @@ abstract class Offer
 	 * @Assert\NotBlank(groups={"new-offer"})
 	 * @Assert\Length(
 	 *	min = 5,
-	 *	max = 20,
+	 *	max = 50,
 	 *	groups={"new-offer"}
 	 * )
 	 * @Serializer\Groups({"new-offer", "list-offers", "transactions"})

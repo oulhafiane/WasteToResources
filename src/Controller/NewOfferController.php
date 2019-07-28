@@ -80,7 +80,7 @@ class NewOfferController extends AbstractController
 		if (null === $fees)
 			return;
 
-		if ($user->getBalance() < ($total + $fees))
+		if ($user->getBalance() < $fees)
 			throw new HttpException(406, 'Insufficient balance.');
 		$user->setBalance($user->getBalance() - $fees);
 

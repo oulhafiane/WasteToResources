@@ -300,7 +300,7 @@ class CurrentUserController extends AbstractController
 		$results = $this->em->getRepository(Message::class)->findByUser($user, $current, $page, $limit)->getCurrentPageResults();
 		$objects = array();
 		foreach ($results as $result) {
-			$objects[] = $result;
+			array_unshift($objects, $result);
 		}
 		$data = $this->serializer->serialize($objects, 'json', SerializationContext::create()->setGroups(['messages']));
 		$response = new Response($data);
