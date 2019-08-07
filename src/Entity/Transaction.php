@@ -73,6 +73,12 @@ class Transaction
 	private $offer;
 
 	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Gain")
+	 * @ORM\JoinColumn(nullable=true)
+	 */
+	private $gain;
+
+	/**
 	 * @ORM\Column(type="uuid", unique=true)
 	 */
 	private $sellerKey;
@@ -211,6 +217,18 @@ class Transaction
 	public function setOffer(?Offer $offer): self
 	{
 		$this->offer = $offer;
+
+		return $this;
+	}
+
+	public function getGain(): ?Gain
+	{
+		return $this->gain;
+	}
+
+	public function setGain(?Gain $gain): self
+	{
+		$this->gain = $gain;
 
 		return $this;
 	}

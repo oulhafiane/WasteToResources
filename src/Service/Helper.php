@@ -2,6 +2,10 @@
 
 namespace App\Service;
 
+use App\Entity\SaleOffer;
+use App\Entity\PurchaseOffer;
+use App\Entity\BulkPurchaseOffer;
+use App\Entity\AuctionBid;
 use App\Entity\Parameter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -15,7 +19,8 @@ class Helper
 		$this->em = $em;
 	}
 
-	public function getOfferFees($total, $offerStaticParam, $offerDynamicParam)
+
+	public function getFees($total, $offerStaticParam, $offerDynamicParam)
 	{
 		$fees = null;
 		$isStatic = $this->em->getRepository(Parameter::class)->get('feesStatic')->getValue();
@@ -29,6 +34,58 @@ class Helper
 			return $fees;
 		}
 		throw new HttpException(500, 'Cannot get fees details.');
+	}
+
+	public function getOfferFees($offer)
+	{
+		$fees = null;
+		if ($offer instanceof SaleOffer) {
+			$fees = $this->getFees($offer->getTotal(), 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
+		} else if ($offer instanceof PurchaseOffer) {
+			$fees = $this->getFees($offer->getTotal(), 'feesPurchaseOfferStatic', 'feesPurchaseOfferDynamic');
+		} else if ($offer instanceof BulkPurchaseOffer) {
+			$fees = $this->getFees($offer->getTotal(), 'feesBulkPurchaseOfferStatic', 'feesBulkPurchaseOfferDynamic');
+		} else if ($offer instanceof AuctionBid) {
+			$period = $offer->getPeriod();
+			switch ($period) {
+			case 1:
+				$fees = $this->helper->getFees($total, 'feesMediumAuctionBidStatic', 'feesMediumAuctionBidDynamic');
+				break;
+			case 2:
+				$fees = $this->helper->getFees($total, 'feesLargeAuctionBidStatic', 'feesLargeAuctionBidDynamic');
+				break;
+			default:
+				$fees = $this->helper->getFees($total, 'feesSmallAuctionBidStatic', 'feesSmallAuctionBidDynamic');
+				break;
+			}
+		} else {
+			throw new HttpException(500, 'Cannot get fees details.');
+		}
+
+		return $fees;
+	}
+
+	public function getRealPeriodAuction($auction)
+	{
+		if (!($auction instanceof AuctionBid))
+			return $em->getRepository(Parameter::class)->findOneBy(['param' => 'periodOffer']);
+		$period = $auction->getPeriod();
+		switch ($period) {
+		case 1:
+			$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'mediumPeriodAuctionBid']);
+			$fees = $this->helper->getFees($total, 'feesMediumAuctionBidStatic', 'feesMediumAuctionBidDynamic');
+			break;
+		case 2:
+			$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'largePeriodAuctionBid']);
+			$fees = $this->helper->getFees($total, 'feesLargeAuctionBidStatic', 'feesLargeAuctionBidDynamic');
+			break;
+		default:
+			$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'smallPeriodAuctionBid']);
+			$fees = $this->helper->getFees($total, 'feesSmallAuctionBidStatic', 'feesSmallAuctionBidDynamic');
+			break;
+		}
+
+		return $realPeriod;
 	}
 
 	public function getTransactionEtat($transaction)

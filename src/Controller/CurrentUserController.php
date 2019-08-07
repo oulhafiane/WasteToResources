@@ -163,21 +163,24 @@ class CurrentUserController extends AbstractController
 		
 		$buyer = $transaction->getBuyer();
 		$seller = $transaction->getSeller();
+		$gain = $transaction->getGain();
 		$current = $this->cr->getCurrentUser($this);
 
 		if ($current->getId() !== $buyer->getId())
 			throw new HttpException(406, 'You are not the buyer of this transaction.');
 
 		$total = $transaction->getTotal();
-		if ($buyer->getBalance() < $total)
+		if ($buyer->getBalance() < $total + $fees)
 			throw new HttpException(406, 'Insufficient balance.');
 
-		$buyer->setBalance($buyer->getBalance() - $total);
+		$buyer->setBalance($buyer->getBalance() - ($total + $fees));
 		$transaction->setPaid();
+		$gain->setPaid();
 
 		try {
 			$this->em->persist($buyer);
 			$this->em->persist($transaction);
+			$this->em->persist($gain);
 			$this->em->flush();
 		} catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');

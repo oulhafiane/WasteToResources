@@ -42,6 +42,7 @@ class TransactionSerializerListener extends AbstractController implements EventS
 	{
 		$current = $this->cr->getCurrentUser($this);
 		$transaction = $event->getObject();
+		$gain = $transaction->getGain();
 		$buyer = $transaction->getBuyer();
 		$seller = $transaction->getSeller();
 
@@ -56,6 +57,11 @@ class TransactionSerializerListener extends AbstractController implements EventS
 		} else
 			throw new HttpException(403, 'Forbidden.');
 
+		if (null === $gain)
+			$fees = $this->helper->getOfferFees($transaction->getOffer());
+		else
+			$fees = $gain->getFees();
+
 		$etat = $this->helper->getTransactionEtat($transaction);
 
 		$withInfos = array(
@@ -68,6 +74,7 @@ class TransactionSerializerListener extends AbstractController implements EventS
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'with', null), $withInfos);
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'etat', null), $etat);
 		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'role', null), $youAre);
+		$visitor->visitProperty(new StaticPropertyMetadata('App\Entity\Transaction', 'fees', null), $fees);
 
 		$groups = $event->getContext()->getAttribute('groups');
 		if ($etat === 1 && in_array('specific', $groups)) {

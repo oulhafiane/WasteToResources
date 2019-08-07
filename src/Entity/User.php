@@ -170,9 +170,9 @@ abstract class User implements UserInterface
 	private $notifications;
 
 	/**
-	 * @ORM\OneToMany(targetEntity="App\Entity\OnHold", mappedBy="user")
+	 * @ORM\OneToMany(targetEntity="App\Entity\Gain", mappedBy="user")
 	 */
-	private $onHolds;
+	private $gains;
 
 	public function __toString()
 	{
@@ -188,7 +188,7 @@ abstract class User implements UserInterface
 		$this->purchasesTransactions = new ArrayCollection();
 		$this->salesTransactions = new ArrayCollection();
 		$this->notifications = new ArrayCollection();
-		$this->onHolds = new ArrayCollection();
+		$this->gains = new ArrayCollection();
 	}
 
 	/**
@@ -641,30 +641,30 @@ abstract class User implements UserInterface
 	}
 
 	/**
-	 * @return Collection|OnHold[]
+	 * @return Collection|Gain[]
 	 */
-	public function getOnHolds(): Collection
+	public function getGains(): Collection
 	{
-		return $this->onHolds;
+		return $this->gains;
 	}
 
-	public function addOnHold(OnHold $onHold): self
+	public function addGain(Gain $gain): self
 	{
-		if (!$this->onHolds->contains($onHold)) {
-			$this->onHolds[] = $onHold;
-			$onHold->setUser($this);
+		if (!$this->gains->contains($gain)) {
+			$this->gains[] = $gain;
+			$gain->setUser($this);
 		}
 
 		return $this;
 	}
 
-	public function removeOnHold(OnHold $onHold): self
+	public function removeGain(Gain $gain): self
 	{
-		if ($this->onHolds->contains($onHold)) {
-			$this->onHolds->removeElement($onHold);
+		if ($this->gains->contains($gain)) {
+			$this->gains->removeElement($gain);
 			// set the owning side to null (unless already changed)
-			if ($onHold->getUser() === $this) {
-				$onHold->setUser(null);
+			if ($gain->getUser() === $this) {
+				$gain->setUser(null);
 			}
 		}
 

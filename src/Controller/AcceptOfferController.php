@@ -14,7 +14,6 @@ use App\Entity\BulkPurchase;
 use App\Entity\AuctionBid;
 use App\Entity\Bid;
 use App\Entity\Transaction;
-use App\Entity\OnHold;
 use App\Entity\Gain;
 use App\Entity\Parameter;
 use App\Entity\Notification;
@@ -42,15 +41,14 @@ class AcceptOfferController extends AbstractController
 	private function refundUser($onhold, $currentUser)
 	{
 		$offer = $onhold->getOffer();
+		$owner = $offer->getOwner();
 		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer, 'isActive' => true], ['price' => 'DESC']);
 		$fees = $onhold->getFees();
 
 		$user = $onhold->getUser();
 		if ($last_bid->getBidder()->getId() === $user->getId()) {
 			$onhold->setPaid();
-			$gain = new Gain();
-			$gain->setTotal($onhold->getFees());
-			$gain->setFromOnHold($onhold);
+			$owner->setBalance($owner->getBalance() + $fees);
 		} else {
 			$onhold->setRefunded();
 			$user->setBalance($user->getBalance() + $fees);
@@ -68,8 +66,9 @@ class AcceptOfferController extends AbstractController
 				$this->em->persist($bid);
 			}
 			if ($last_bid->getBidder()->getId() === $user->getId()) {
-				$this->em->persist($gain);
+				$this->em->persist($owner);
 				$message = "You left the auction and you lost ".$fees." MAD on";
+				$this->notifyGainToOwner($offer, $fees);
 			} else {
 				$this->em->persist($user);
 				$message = "You left the auction and ".$fees." MAD has been returned on";
@@ -79,6 +78,24 @@ class AcceptOfferController extends AbstractController
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
 		}
+	}
+
+	private function notifyGainToOwner($offer, $gain)
+	{
+		$owner = $offer->getOwner();
+		$notification = new Notification();
+		$notification->setUser($owner);
+		$notification->setType(0);
+		$notification->setReference($offer->getId());
+		$notification->setMessage("You gain ".$gain." MAD because the first bidder leaves your auction.");
+
+		try {
+			$this->em->persist($notification);
+		} catch (\Exception $ex) {
+			throw new HttpException(406, 'Not Acceptable.');
+		}
+
+		$this->mercure->publishNotification($notification, $owner);
 	}
 
 	private function notifyBidUpdatedToUser($user, $offer, $currentUser, $message = null)
@@ -108,7 +125,7 @@ class AcceptOfferController extends AbstractController
 	{
 		$notification = new Notification();
 		$notification->setUser($buyer);
-		$notification->setType(1);
+		$notification->setType(0);
 		$notification->setReference($offer->getId());
 		$notification->setMessage($seller->getFirstName()." ".$seller->getLastName()." accepted to sell you ".$weight."KG on : ".$offer->getTitle().".");
 
@@ -125,7 +142,7 @@ class AcceptOfferController extends AbstractController
 	{
 		$notification = new Notification();
 		$notification->setUser($buyer);
-		$notification->setType(2);
+		$notification->setType(0);
 		$notification->setReference($offer->getId());
 		$notification->setMessage($buyer->getFirstName()." ".$buyer->getLastName()." accepted to buy from you : ".$offer->getTitle().".");
 
@@ -141,30 +158,31 @@ class AcceptOfferController extends AbstractController
 	private function handleSaleOffer($offer, $user)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
-		$fees = $this->helper->getOfferFees($total, 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
+		$fees = $this->helper->getFees($total, 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
 		if ($user->getBalance() < ($total + $fees))
 			throw new HttpException(406, 'Insufficient balance.');
 		$user->setBalance($user->getBalance() - ($total + $fees));
+
+		$gain = new Gain();
+		$gain->setOffer($offer);
+		$gain->setUser($user);
+		$gain->setFees($fees);
+		$gain->setPaid();
 
 		$transaction = new Transaction();
 		$transaction->setBuyer($user);
 		$transaction->setSeller($offer->getOwner());
 		$transaction->setTotal($total);
 		$transaction->setOffer($offer);
+		$transaciton->setGain($gain);
 		$transaction->setPaid();
-
-		$onHold = new OnHold();
-		$onHold->setOffer($offer);
-		$onHold->setUser($user);
-		$onHold->setFees($fees);
-
 
 		$offer->setBuyer($user);
 		$offer->setInactive();
 
 		try {
 			$this->em->persist($transaction);
-			$this->em->persist($onHold);
+			$this->em->persist($gain);
 			$this->em->persist($offer);
 			$this->em->persist($user);
 			$this->em->flush();
@@ -231,14 +249,14 @@ class AcceptOfferController extends AbstractController
 
 	private function checkIfBidder($offer, $user)
 	{
-		$onHold = $this->em->getRepository(OnHold::class)->findOneBy([
+		$gain = $this->em->getRepository(Gain::class)->findOneBy([
 			'offer' => $offer,
 			'user' => $user,
 			'paid' => false,
 			'refunded' => false
 		], ['date' => 'DESC']);
 
-		if (null === $onHold)
+		if (null === $gain)
 			return false;
 		else
 			return true;
@@ -247,12 +265,12 @@ class AcceptOfferController extends AbstractController
 	private function handleAuctionBid($offer, $user, $request)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
-		$fees = $this->em->getRepository(Parameter::class)->get('feesBid')->getValue();
+		$fees = $offer->getWarranty();
 		if (null === $fees)
-			throw new HttpException(500, 'Cannot get fees details.');
+			$fees = 0;
 		$alreadyBidder = $this->checkIfBidder($offer, $user);
 		if (false === $alreadyBidder && $user->getBalance() < $fees)
-			throw new HttpException(406, 'Insufficient balance, you must pay fees of Bid : '.$fees);
+			throw new HttpException(406, 'Insufficient balance, you must pay warranty of Bid : '.$fees);
 		$data = json_decode($request->getContent(), true);
 		if (!array_key_exists('bid_price', $data))
 			throw new HttpException(406, 'bid_price not found.');
@@ -269,10 +287,10 @@ class AcceptOfferController extends AbstractController
 		if (false === $alreadyBidder) {
 			$user->setBalance($user->getBalance() - $fees);
 
-			$onHold = new OnHold();
-			$onHold->setOffer($offer);
-			$onHold->setFees($fees);
-			$onHold->setUser($user);
+			$gain = new Gain();
+			$gain->setOffer($offer);
+			$gain->setFees($fees);
+			$gain->setUser($user);
 		}
 
 		$bid = new Bid();
@@ -283,7 +301,7 @@ class AcceptOfferController extends AbstractController
 		try {
 			$this->em->persist($bid);
 			if (false === $alreadyBidder) {
-				$this->em->persist($onHold);
+				$this->em->persist($gain);
 				$this->em->persist($user);
 			}
 			$this->em->flush();
@@ -366,7 +384,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(404, 'Auction not found.');
 		$user = $this->cr->getCurrentUser($this);
 
-		$onhold = $this->em->getRepository(OnHold::class)->findOneBy([
+		$onhold = $this->em->getRepository(Gain::class)->findOneBy([
 			'user' => $user,
 			'offer' => $offer,
 			'paid' => false,

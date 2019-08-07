@@ -10,7 +10,7 @@ use App\Entity\SaleOffer;
 use App\Entity\PurchaseOffer;
 use App\Entity\BulkPurchaseOffer;
 use App\Entity\AuctionBid;
-use App\Entity\OnHold;
+use App\Entity\Gain;
 use App\Entity\Parameter;
 use App\Helper\UploadedBase64EncodedFile;
 use App\Helper\Base64EncodedFile;
@@ -49,29 +49,8 @@ class NewOfferController extends AbstractController
 	private function payFees($user, $offer, $em)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
-		$fees = null;
-		$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'periodOffer']);
-		if ($offer instanceof PurchaseOffer) {
-			$fees = $this->helper->getOfferFees($total, 'feesPurchaseOfferStatic', 'feesPurchaseOfferDynamic');
-		} else if ($offer instanceof BulkPurchaseOffer) {
-			$fees = $this->helper->getOfferFees($total, 'feesBulkPurchaseOfferStatic', 'feesBulkPurchaseOfferDynamic');
-		} else if ($offer instanceof AuctionBid) {
-			$period = $offer->getPeriod();
-			switch ($period) {
-				case 1:
-					$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'mediumPeriodAuctionBid']);
-					$fees = $this->helper->getOfferFees($total, 'feesMediumAuctionBidStatic', 'feesMediumAuctionBidDynamic');
-					break;
-				case 2:
-					$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'largePeriodAuctionBid']);
-					$fees = $this->helper->getOfferFees($total, 'feesLargeAuctionBidStatic', 'feesLargeAuctionBidDynamic');
-					break;
-				default:
-					$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'smallPeriodAuctionBid']);
-					$fees = $this->helper->getOfferFees($total, 'feesSmallAuctionBidStatic', 'feesSmallAuctionBidDynamic');
-					break;
-			}
-		}
+		$fees = $this->helper->getOfferFees($offer);
+		$realPeriod = $this->helper->getRealPeriodAuction($offer);
 
 		$endDate = new \DateTime(date("Y-m-d H:i:s", strtotime("+".$realPeriod->getValue()." day")));
 		//$endDate = new \DateTime(date("Y-m-d H:i:s", strtotime("+5 minute")));
@@ -84,13 +63,14 @@ class NewOfferController extends AbstractController
 			throw new HttpException(406, 'Insufficient balance.');
 		$user->setBalance($user->getBalance() - $fees);
 
-		$onHold = new OnHold();
-		$onHold->setOffer($offer);
-		$onHold->setUser($user);
-		$onHold->setFees($fees);
+		$gain = new Gain();
+		$gain->setOffer($offer);
+		$gain->setUser($user);
+		$gain->setFees($fees);
+		$gain->setType(Gain::CREATOR);
 
 		try {
-			$em->persist($onHold);
+			$em->persist($gain);
 			$em->persist($user);
 		} catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');

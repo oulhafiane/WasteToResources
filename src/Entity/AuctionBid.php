@@ -43,6 +43,14 @@ class AuctionBid extends Offer
 	 */
 	private $period;
 
+	/**
+	 * @ORM\Column(type="bigint", nullable=true)
+	 * @Serializer\Type("integer")
+	 * @Serializer\Groups({"new-offer", "list-offers"})
+	 * @Assert\Positive(groups={"new-offer"})
+	 */
+	private $warranty;
+
     public function __construct()
     {
         parent::__construct();
@@ -112,6 +120,18 @@ class AuctionBid extends Offer
     public function setPeriod(int $period): self
     {
         $this->period = $period;
+
+        return $this;
+    }
+
+    public function getWarranty(): ?int
+    {
+        return $this->warranty;
+    }
+
+    public function setWarranty(int $warranty): self
+    {
+        $this->warranty = $warranty;
 
         return $this;
     }

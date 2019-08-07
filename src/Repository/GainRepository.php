@@ -19,28 +19,26 @@ class GainRepository extends ServiceEntityRepository
         parent::__construct($registry, Gain::class);
     }
 
-    // /**
-    //  * @return Gain[] Returns an array of Gain objects
-    //  */
-    /*
-    public function findByExampleField($value)
+//    /**
+//     * @return Gain[] Returns an array of Gain objects
+//     */
+/*    public function getGains($id_user)
     {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('g.id', 'ASC')
-            ->setMaxResults(10)
+        return $this->createQueryBuilder('u')
+            ->andWhere('o.owner_id = :val')
+            ->setParameter('val', $id_user)
+            ->orderBy('o.id', 'ASC')
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+*/ 
 
     /*
     public function findOneBySomeField($value): ?Gain
     {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.exampleField = :val')
             ->setParameter('val', $value)
             ->getQuery()
             ->getOneOrNullResult()

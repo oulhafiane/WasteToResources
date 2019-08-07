@@ -46,7 +46,7 @@ class UserSerializerListener implements EventSubscriberInterface
 			return ;
 
 		$user = $event->getObject();
-		$onholds = $user->getOnHolds();
+		$onholds = $user->getGains();
 		$total = 0;
 		foreach ($onholds as $onhold) {
 			if ($onhold->isPaid() === false && $onhold->isRefunded() === false)

@@ -122,9 +122,9 @@ abstract class Offer
 	private $isActive;
 
 	/**
-	 * @ORM\OneToMany(targetEntity="App\Entity\OnHold", mappedBy="offer")
+	 * @ORM\OneToMany(targetEntity="App\Entity\Gain", mappedBy="offer")
 	 */
-	private $onHolds;
+	private $gains;
 
 	private $tmpEndDate;
 
@@ -135,7 +135,7 @@ abstract class Offer
 
 	public function __construct()
 	{
-		$this->onHolds = new ArrayCollection();
+		$this->gains = new ArrayCollection();
 	}
 
 	/**
@@ -305,30 +305,30 @@ abstract class Offer
 	}
 
 	/**
-	 * @return Collection|OnHold[]
+	 * @return Collection|Gain[]
 	 */
-	public function getOnHolds(): Collection
+	public function getGains(): Collection
 	{
-		return $this->onHolds;
+		return $this->gains;
 	}
 
-	public function addOnHold(OnHold $onHold): self
+	public function addGain(Gain $gain): self
 	{
-		if (!$this->onHolds->contains($onHold)) {
-			$this->onHolds[] = $onHold;
-			$onHold->setOffer($this);
+		if (!$this->gains->contains($gain)) {
+			$this->gains[] = $gain;
+			$gain->setOffer($this);
 		}
 
 		return $this;
 	}
 
-	public function removeOnHold(OnHold $onHold): self
+	public function removeGain(Gain $gain): self
 	{
-		if ($this->onHolds->contains($onHold)) {
-			$this->onHolds->removeElement($onHold);
+		if ($this->gains->contains($gain)) {
+			$this->gains->removeElement($gain);
 			// set the owning side to null (unless already changed)
-			if ($onHold->getOffer() === $this) {
-				$onHold->setOffer(null);
+			if ($gain->getOffer() === $this) {
+				$gain->setOffer(null);
 			}
 		}
 
