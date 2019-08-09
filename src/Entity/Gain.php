@@ -69,8 +69,10 @@ class Gain
 	public function onPrePersist()
 	{
 		$this->setDate(new \DateTime());
-		$this->paid = false;
-		$this->refunded = false;
+		if ((null === $this->paid && null === $this->refunded) || ($this->paid === false && $this->refunded === false)) {
+			$this->paid = false;
+			$this->refunded = false;
+		}
 		if (null == $this->type)
 			$this->type = self::NOTCREATOR;
 	}
@@ -87,10 +89,9 @@ class Gain
 
 	public function setPaid(): self
 	{
-		if ($this->paid === False && $this->refunded === False)
-		{
-			$this->paid = True;
-			$this->refunded = False;
+		if ((null === $this->paid && null === $this->refunded) || ($this->paid === false && $this->refunded === false)) {
+			$this->paid = true;
+			$this->refunded = false;
 		}
 
 		return $this;
@@ -103,10 +104,9 @@ class Gain
 
 	public function setRefunded(): self
 	{
-		if ($this->paid === False && $this->refunded === False)
-		{
-			$this->paid = False;
-			$this->refunded = True;
+		if ($this->paid === false && $this->refunded === false) {
+			$this->paid = false;
+			$this->refunded = true;
 		}
 
 		return $this;
@@ -114,7 +114,7 @@ class Gain
 
 	public function getType(): ?int
 	{
-		return $this;
+		return $this->type;
 	}
 
 	public function setType(?int $type): ?self

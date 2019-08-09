@@ -58,7 +58,7 @@ class TransactionSerializerListener extends AbstractController implements EventS
 			throw new HttpException(403, 'Forbidden.');
 
 		if (null === $gain)
-			$fees = $this->helper->getOfferFees($transaction->getOffer());
+			$fees = $this->helper->getFees($total, 'feesTransactionStatic', 'feesTransactionDynamic');
 		else
 			$fees = $gain->getFees();
 

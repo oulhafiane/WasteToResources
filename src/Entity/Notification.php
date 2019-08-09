@@ -11,6 +11,9 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class Notification
 {
+	const OFFER = 0;
+	const OFFERREFUND = 2;
+
 	/**
 	 * @ORM\Id()
 	 * @ORM\GeneratedValue()

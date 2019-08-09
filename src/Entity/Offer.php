@@ -61,6 +61,7 @@ abstract class Offer
 	 * @Serializer\Type("bool")
 	 * @Serializer\SerializedName("withTransport")
 	 * @Serializer\Groups({"new-offer", "list-offers"})
+	 * @Assert\NotNull(groups={"new-offer"})
 	 */
 	protected $withTransport;
 
@@ -112,6 +113,7 @@ abstract class Offer
 	 * @ORM\JoinColumn(nullable=false)
 	 * @Serializer\Type("App\Entity\Category")
 	 * @Serializer\Groups({"new-offer", "list-offers"})
+	 * @Assert\NotNull(groups={"new-offer"})
 	 */
 	protected $category;
 

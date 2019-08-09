@@ -163,11 +163,12 @@ class CurrentUserController extends AbstractController
 		
 		$buyer = $transaction->getBuyer();
 		$seller = $transaction->getSeller();
-		$gain = $transaction->getGain();
 		$current = $this->cr->getCurrentUser($this);
 
 		if ($current->getId() !== $buyer->getId())
 			throw new HttpException(406, 'You are not the buyer of this transaction.');
+
+		$fees = $this->helper->getFees($total, 'feesTransactionStatic', 'feesTransactionDynamic');
 
 		$total = $transaction->getTotal();
 		if ($buyer->getBalance() < $total + $fees)
@@ -175,6 +176,11 @@ class CurrentUserController extends AbstractController
 
 		$buyer->setBalance($buyer->getBalance() - ($total + $fees));
 		$transaction->setPaid();
+
+		$gain = new Gain();
+		$gain->setOffer($transaction->getOffer());
+		$gain->setUser($buyer);
+		$gain->setType(Gain::NOTCREATOR);
 		$gain->setPaid();
 
 		try {

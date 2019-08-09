@@ -26,8 +26,9 @@ class Mercure
 		} catch (\Exception $ex) {}
 	}
 
-	public function publishNotification($notifiaction, $user)
+	public function publishNotification($notification)
 	{
+		$user = $notification->getUser();
 		$this->publish(
 			'waste_to_resources/notifications',
 			json_encode([

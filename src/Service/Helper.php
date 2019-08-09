@@ -38,24 +38,24 @@ class Helper
 
 	public function getOfferFees($offer)
 	{
-		$fees = null;
+		$total = $offer->getPrice() * $offer->getWeight();
 		if ($offer instanceof SaleOffer) {
-			$fees = $this->getFees($offer->getTotal(), 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
+			return null;
 		} else if ($offer instanceof PurchaseOffer) {
-			$fees = $this->getFees($offer->getTotal(), 'feesPurchaseOfferStatic', 'feesPurchaseOfferDynamic');
+			$fees = $this->getFees($total, 'feesPurchaseOfferStatic', 'feesPurchaseOfferDynamic');
 		} else if ($offer instanceof BulkPurchaseOffer) {
-			$fees = $this->getFees($offer->getTotal(), 'feesBulkPurchaseOfferStatic', 'feesBulkPurchaseOfferDynamic');
+			$fees = $this->getFees($total, 'feesBulkPurchaseOfferStatic', 'feesBulkPurchaseOfferDynamic');
 		} else if ($offer instanceof AuctionBid) {
 			$period = $offer->getPeriod();
 			switch ($period) {
 			case 1:
-				$fees = $this->helper->getFees($total, 'feesMediumAuctionBidStatic', 'feesMediumAuctionBidDynamic');
+				$fees = $this->getFees($total, 'feesMediumAuctionBidStatic', 'feesMediumAuctionBidDynamic');
 				break;
 			case 2:
-				$fees = $this->helper->getFees($total, 'feesLargeAuctionBidStatic', 'feesLargeAuctionBidDynamic');
+				$fees = $this->getFees($total, 'feesLargeAuctionBidStatic', 'feesLargeAuctionBidDynamic');
 				break;
 			default:
-				$fees = $this->helper->getFees($total, 'feesSmallAuctionBidStatic', 'feesSmallAuctionBidDynamic');
+				$fees = $this->getFees($total, 'feesSmallAuctionBidStatic', 'feesSmallAuctionBidDynamic');
 				break;
 			}
 		} else {
@@ -68,20 +68,17 @@ class Helper
 	public function getRealPeriodAuction($auction)
 	{
 		if (!($auction instanceof AuctionBid))
-			return $em->getRepository(Parameter::class)->findOneBy(['param' => 'periodOffer']);
+			return $this->em->getRepository(Parameter::class)->findOneBy(['param' => 'periodOffer']);
 		$period = $auction->getPeriod();
 		switch ($period) {
 		case 1:
-			$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'mediumPeriodAuctionBid']);
-			$fees = $this->helper->getFees($total, 'feesMediumAuctionBidStatic', 'feesMediumAuctionBidDynamic');
+			$realPeriod = $this->em->getRepository(Parameter::class)->findOneBy(['param' => 'mediumPeriodAuctionBid']);
 			break;
 		case 2:
-			$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'largePeriodAuctionBid']);
-			$fees = $this->helper->getFees($total, 'feesLargeAuctionBidStatic', 'feesLargeAuctionBidDynamic');
+			$realPeriod = $this->em->getRepository(Parameter::class)->findOneBy(['param' => 'largePeriodAuctionBid']);
 			break;
 		default:
-			$realPeriod = $em->getRepository(Parameter::class)->findOneBy(['param' => 'smallPeriodAuctionBid']);
-			$fees = $this->helper->getFees($total, 'feesSmallAuctionBidStatic', 'feesSmallAuctionBidDynamic');
+			$realPeriod = $this->em->getRepository(Parameter::class)->findOneBy(['param' => 'smallPeriodAuctionBid']);
 			break;
 		}
 

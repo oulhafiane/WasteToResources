@@ -38,19 +38,19 @@ class AcceptOfferController extends AbstractController
 		$this->mercure = $mercure;
 	}
 
-	private function refundUser($onhold, $currentUser)
+	private function refundUser($gain, $currentUser)
 	{
-		$offer = $onhold->getOffer();
+		$offer = $gain->getOffer();
 		$owner = $offer->getOwner();
 		$last_bid = $this->em->getRepository(Bid::class)->findOneBy(['offer' => $offer, 'isActive' => true], ['price' => 'DESC']);
-		$fees = $onhold->getFees();
+		$fees = $gain->getFees();
 
-		$user = $onhold->getUser();
+		$user = $gain->getUser();
 		if ($last_bid->getBidder()->getId() === $user->getId()) {
-			$onhold->setPaid();
+			$gain->setPaid();
 			$owner->setBalance($owner->getBalance() + $fees);
 		} else {
-			$onhold->setRefunded();
+			$gain->setRefunded();
 			$user->setBalance($user->getBalance() + $fees);
 		}
 
@@ -71,9 +71,9 @@ class AcceptOfferController extends AbstractController
 				$this->notifyGainToOwner($offer, $fees);
 			} else {
 				$this->em->persist($user);
-				$message = "You left the auction and ".$fees." MAD has been returned on";
+				$message = "You got your money back (".$fees." MAD) because you left the auction";
 			}
-			$this->em->persist($onhold);
+			$this->em->persist($gain);
 			$this->notifyBidUpdatedToUser($user, $offer, $currentUser, $message);
 		}catch (\Exception $ex) {
 			throw new HttpException(406, 'Not Acceptable.');
@@ -95,7 +95,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		$this->mercure->publishNotification($notification, $owner);
+		$this->mercure->publishNotification($notification);
 	}
 
 	private function notifyBidUpdatedToUser($user, $offer, $currentUser, $message = null)
@@ -118,7 +118,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		$this->mercure->publishNotification($notification, $user);
+		$this->mercure->publishNotification($notification);
 	}
 
 	private function notifyPurchaseAcceptedToBuyer($buyer, $offer, $seller, $weight)
@@ -135,7 +135,7 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		$this->mercure->publishNotification($notification, $buyer);
+		$this->mercure->publishNotification($notification);
 	}
 
 	private function notifySaleAcceptedToOwner($owner, $offer, $buyer)
@@ -152,13 +152,13 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		$this->mercure->publishNotification($notification, $buyer);
+		$this->mercure->publishNotification($notification);
 	}
 
 	private function handleSaleOffer($offer, $user)
 	{
 		$total = $offer->getPrice() * $offer->getWeight();
-		$fees = $this->helper->getFees($total, 'feesSaleOfferStatic', 'feesSaleOfferDynamic');
+		$fees = $this->helper->getFees($total, 'feesTransactionStatic', 'feesTransactionDynamic');
 		if ($user->getBalance() < ($total + $fees))
 			throw new HttpException(406, 'Insufficient balance.');
 		$user->setBalance($user->getBalance() - ($total + $fees));
@@ -167,6 +167,7 @@ class AcceptOfferController extends AbstractController
 		$gain->setOffer($offer);
 		$gain->setUser($user);
 		$gain->setFees($fees);
+		$gain->setType(Gain::NOTCREATOR);
 		$gain->setPaid();
 
 		$transaction = new Transaction();
@@ -174,7 +175,7 @@ class AcceptOfferController extends AbstractController
 		$transaction->setSeller($offer->getOwner());
 		$transaction->setTotal($total);
 		$transaction->setOffer($offer);
-		$transaciton->setGain($gain);
+		$transaction->setGain($gain);
 		$transaction->setPaid();
 
 		$offer->setBuyer($user);
@@ -384,19 +385,19 @@ class AcceptOfferController extends AbstractController
 			throw new HttpException(404, 'Auction not found.');
 		$user = $this->cr->getCurrentUser($this);
 
-		$onhold = $this->em->getRepository(Gain::class)->findOneBy([
+		$gain = $this->em->getRepository(Gain::class)->findOneBy([
 			'user' => $user,
 			'offer' => $offer,
 			'paid' => false,
 			'refunded' => false
 		]);
 
-		if (null === $onhold) {
+		if (null === $gain) {
 			$code = 406;
 			$message = "You are not an active bidder in this offer.";
 		} else {
 			try {
-				$this->refundUser($onhold, $user);
+				$this->refundUser($gain, $user);
 				$this->em->flush();
 			}catch (\Exception $ex) {
 				throw new HttpException(406, 'Not Acceptable.');

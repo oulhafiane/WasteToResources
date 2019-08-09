@@ -44,7 +44,7 @@ class AuctionBid extends Offer
 	private $period;
 
 	/**
-	 * @ORM\Column(type="bigint", nullable=true)
+	 * @ORM\Column(type="bigint")
 	 * @Serializer\Type("integer")
 	 * @Serializer\Groups({"new-offer", "list-offers"})
 	 * @Assert\Positive(groups={"new-offer"})

@@ -100,8 +100,8 @@ class Transaction
 	{
 		$this->startDate = new \DateTime();
 		$this->endDate = null;
-		$this->setSellerKey(Uuid::uuid4()->toString());
-		$this->setBuyerKey(Uuid::uuid4()->toString());
+		$this->sellerKey = Uuid::uuid4()->toString();
+		$this->buyerKey = Uuid::uuid4()->toString();
 		if (null === $this->paid)
 			$this->paid = false;
 		if (null === $this->completed)

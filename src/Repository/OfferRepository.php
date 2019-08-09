@@ -18,6 +18,17 @@ class OfferRepository extends AbstractOfferRepository
         parent::__construct($registry, Offer::class);
     }
 
+	public function getEndedOffers()
+	{
+		return $this->createQueryBuilder('o')
+			->andWhere('o.isActive = true')
+			->andWhere('o.endDate < :today')
+			->setParameter('today', new \DateTime(date("Y-m-d H:i:s")))
+			->getQuery()
+			->getResult()
+		;
+	}
+
     // /**
     //  * @return Offer[] Returns an array of Offer objects
     //  */
