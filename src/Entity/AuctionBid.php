@@ -47,6 +47,7 @@ class AuctionBid extends Offer
 	 * @ORM\Column(type="bigint")
 	 * @Serializer\Type("integer")
 	 * @Serializer\Groups({"new-offer", "list-offers"})
+	 * @Assert\NotBlank(groups={"new-offer"})
 	 * @Assert\Positive(groups={"new-offer"})
 	 */
 	private $warranty;

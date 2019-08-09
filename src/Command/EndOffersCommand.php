@@ -69,23 +69,32 @@ class EndOffersCommand extends ContainerAwareCommand
 		$transaction->setGain($gain);
 		if (true === $paid) {
 			$transaction->setPaid();
-			$message = "You win the auction and you paid it successfully.";
+			$messageBuyer = "You win the auction (".$offer->getTitle().") and you paid it successfully.";
+			$messageSeller = "Your auction (".$offer->getTitle().") ended and paid successfully.";
 		} else {
-			$message = "You win the auction and you need to pay the transaction.";
+			$messageBuyer = "You win the auction (".$offer->getTitle().") and you need to pay the transaction.";
+			$messageSeller = "Your auction (".$offer->getTitle().") ended and it pending payment.";
 		}
 		
 		$offer->setInactive();
 
-		$notification = new Notification();
-		$notification->setMessage($message);
-		$notification->setType(Notification::TRANSACTION);
-		$notification->setUser($user);
-		$notification->setReference($transaction->getId());
+		$notificationBuyer = new Notification();
+		$notificationBuyer->setMessage($messageBuyer);
+		$notificationBuyer->setType(Notification::TRANSACTION);
+		$notificationBuyer->setUser($user);
+		$notificationBuyer->setReference($transaction->getId());
+
+		$notificationSeller = new Notification();
+		$notificationSeller->setMessage($messageSeller);
+		$notificationSeller->setType(Notification::TRANSACTION);
+		$notificationSeller->setUser($offer->getOwner());
+		$notificationSeller->setReference($transaction->getId());
 
 		try {
 			$this->em->persist($transaction);
 			$this->em->persist($offer);
-			$this->em->persist($notification);
+			$this->em->persist($notificationBuyer);
+			$this->em->persist($notificationSeller);
 			if (true === $paid) {
 				$this->em->persist($gain);
 				$this->em->persist($user);
@@ -95,7 +104,8 @@ class EndOffersCommand extends ContainerAwareCommand
 			throw new HttpException(406, 'Not Acceptable.');
 		}
 
-		$this->mercure->publishNotification($notification);
+		$this->mercure->publishNotification($notificationBuyer);
+		$this->mercure->publishNotification($notificationSeller);
 	}
 
 	private function endAuction($auction, $output)

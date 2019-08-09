@@ -12,6 +12,7 @@ use JMS\Serializer\Annotation as Serializer;
 class Notification
 {
 	const OFFER = 0;
+	const TRANSACTION = 1;
 	const OFFERREFUND = 2;
 
 	/**
