@@ -9,7 +9,7 @@ There are three types of users in this platform:
 
 ## Technologies Used
 
-This is the backend part of the project using the framework: PHP / Symfony
+This is the backend part of the project using the framework: Symfony(PHP)
 
 For the front-end check [this link](https://github.com/oulhafiane/react-waste)
 
