@@ -1,5 +1,5 @@
 # WasteToResources
-A platform for connecting small sellers of waste (Restaurant, Café, Garage, Normal Person, ...) with Buyers who need this waste to be recycled (Recycling companies).  
+A platform for connecting small sellers of waste (Restaurant, Coffee shop, Garage, Normal Person, ...) with Buyers who need this waste to be recycled (Recycling companies).  
 
 
 There are three types of users in this platform:
