@@ -1,3 +1,4 @@
+[![42 Profile Card](https://1337-readme-xi.vercel.app/api/profile?cursus=42cursus&login=zoulhafi)](https://github.com/mohouyizme/1337-readme)
 # WasteToResources
 A platform for connecting small sellers of waste (Restaurant, Coffee shop, Garage, Normal Person, ...) with Buyers who need this waste to be recycled (Recycling companies).  
 
